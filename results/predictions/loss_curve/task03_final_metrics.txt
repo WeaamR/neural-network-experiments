@@ -1,0 +1,23 @@
+Task 03 — Epoch-Based Learning Curve Exploration
+=======================================================
+
+Results for 5 Epochs
+------------------------------
+Final Training Loss: 0.0714
+Final Validation Loss: 0.0963
+Final Training Accuracy: 0.9783
+Final Validation Accuracy: 0.9734
+
+Results for 10 Epochs
+------------------------------
+Final Training Loss: 0.0308
+Final Validation Loss: 0.0862
+Final Training Accuracy: 0.9908
+Final Validation Accuracy: 0.9774
+
+Results for 20 Epochs
+------------------------------
+Final Training Loss: 0.0103
+Final Validation Loss: 0.1340
+Final Training Accuracy: 0.9970
+Final Validation Accuracy: 0.9748
