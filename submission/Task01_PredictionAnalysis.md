@@ -45,24 +45,24 @@ for index in sample_indices:
 
 ### Sample 1
 
-* **Predicted Label:** `[write the predicted label]`
-* **True Label:** `[write the true label]`
-* **Confidence:** `[write the confidence]`
-* **Prediction Status:** `Correct / Incorrect`
+* **Predicted Label:** `6`
+* **True Label:** `6`
+* **Confidence:** `0.9998164`
+* **Prediction Status:** `Correct`
 
 ### Sample 2
 
-* **Predicted Label:** `[write the predicted label]`
-* **True Label:** `[write the true label]`
-* **Confidence:** `[write the confidence]`
-* **Prediction Status:** `Correct / Incorrect`
+* **Predicted Label:** `1`
+* **True Label:** `1`
+* **Confidence:** `0.99873286`
+* **Prediction Status:** `Correct`
 
 ### Sample 3
 
-* **Predicted Label:** `[write the predicted label]`
-* **True Label:** `[write the true label]`
-* **Confidence:** `[write the confidence]`
-* **Prediction Status:** `Correct / Incorrect`
+* **Predicted Label:** `2`
+* **True Label:** `2`
+* **Confidence:** `0.99996984`
+* **Prediction Status:** `Correct`
 
 ## 4. Short Analysis
 
@@ -76,7 +76,7 @@ The Softmax activation function in the output layer converted the final values i
 
 The Adam optimizer contributed during training by updating the model weights based on the gradients and reducing the loss. These learned weights caused the model to assign the highest probability to class `[predicted label]`.
 
-The prediction was `[correct/incorrect]` because `[explain whether the detected image features matched the correct class or resembled another class]`.
+The prediction was `correct` because `the detected image features matched the correct class`.
 
 ### Sample 2 Analysis
 
