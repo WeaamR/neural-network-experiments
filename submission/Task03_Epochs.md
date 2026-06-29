@@ -181,15 +181,19 @@ with open(results_file, "w", encoding="utf-8") as file:
 ### 4. Short Analysis
 
 **5 Epochs — Underfitting zone:**
+
 Both curves are still descending at epoch 5 with no gap between them, which means the model has not yet converged. Training accuracy of 0.9783 vs. validation accuracy of 0.9732 shows the two are still close — a sign that the model is still learning generalizable features and has not started memorizing. This is the healthy early-training phase, but stopping here leaves performance on the table.
 
 **10 Epochs — Sweet spot:**
+
 At 10 epochs, the training loss (0.0290) is notably lower than validation loss (0.0887), and a small gap begins to appear between the two curves. However, validation accuracy (0.9772) is still improving and the gap is not widening aggressively. This is the most balanced run — the model has learned robust representations without significantly overfitting.
 
 **20 Epochs — Early overfitting signal:**
+
 This is where the divergence becomes clear. Training loss dropped to 0.0091 while validation loss actually increased to 0.1131 — higher than at 10 epochs. Looking at the loss curve, the validation loss plateaus and starts drifting upward after approximately epoch 5–7, while training loss continues to fall. Training accuracy reached 0.9973 but validation accuracy only gained marginally (0.9782), a difference of nearly 2% — a classic overfitting signature. The model is memorizing training-specific patterns rather than learning generalizable features.
 
 **Adam optimizer's role:**
+
 Across all three runs, Adam drove fast and stable convergence in the early epochs — the sharp drop in training loss between epoch 0 and epoch 3 is visible in all three plots. This is Adam's adaptive learning rate at work: it automatically scales updates per-weight based on gradient history, allowing the model to make large steps early when gradients are strong and smaller, more precise steps as it approaches a minimum. This is why even the 5-epoch run already achieves 97%+ accuracy — Adam compresses the useful learning into very few epochs. However, Adam's efficiency also means the model reaches the overfitting threshold faster, which is why the validation loss starts rising noticeably by epoch 7–8 in the 20-epoch run without any regularization in place.
 
 ---
