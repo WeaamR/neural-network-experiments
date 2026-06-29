@@ -7,71 +7,7 @@ The objective of this task is to analyze the predictions of a trained neural net
 ## 2. Code Used
 
 ```python
-import tensorflow as tf
-from tensorflow import keras
-import numpy as np
-import matplotlib.pyplot as plt
 
-(x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
-
-# Normalization
-x_train ,  x_test = x_train / 255.0 , x_test/255.0
-
-# divide x_train  into x_val and x_train
-
-x_val = x_train[55000:60000]
-x_train= x_train[0:55000]
-
-# the same thing for y_train
-y_val = y_train[55000:60000]
-y_train= y_train[0:55000]
-
-# prepare the model as a templete
-# i will use it later to train data (train set)
-
-model = keras.Sequential( # Sequential: the model stacks layers one after another.
-        [
-        keras.layers.Flatten(input_shape=(28,28)), # input Layer: convert each 28×28 image into a vector of 784 pixel values
-        # كل ما زاد تعقيد الصور، بزيد عدد ال unit
-        # 64  >> 128  >> 256
-        # Each neuron is connected to all 784 pixel values, Each neuron is connected to all 784 pixel values, hence its name, Dense.
-        keras.layers.Dense(64, activation="relu"), # hidden Layer 1: learns patterns from the pixels
-        keras.layers.Dense(10 , activation ="softmax") # output layers: one probability for each digit from 0 to 9
-        ]
-        # قرار عدد الطبقات يخضع للتجربة
-)
-
-# adam Adaptive Moment Estimation >> Optimizer
-# prepare the model so it's ready for training and the backprog process.
-model.compile(optimizer='adam', # how to update w
-              loss='sparse_categorical_crossentropy', # how to calculate loss
-              metrics=['accuracy'] # what is metrics
-              )
-
-# EarlyStopping => To stop training when the improvement in Validation Loss ceases:
-callback = tf.keras.callbacks.EarlyStopping(patience=3,monitor="val_loss",restore_best_weights=True)
-
-# patience here allows training to continue for 5 consecutive epochs without improvement in val_loss.
-
-history = model.fit(x_train,y_train ,epochs= 30, validation_data= (x_val,y_val),callbacks=callback )
-
-# Find the index of the lowest validation loss.
-
-# np.argmin search for index of minimum value
-# np.argmin() returns the index starting from 0,
-# so we add 1 to convert it to the actual epoch number.
-# history stores the metrics values ​​for each epoch.
-best_epoch = np.argmin(history.history["val_loss"]) + 1
-
-
-# Find the lowest validation loss value achieved during training.
-# np.min search for index of minimum value
-best_val_loss = np.min(history.history["val_loss"])
-
-print("Best epoch:", best_epoch)
-print("Best val_loss:", best_val_loss)
-
-#####################################################################################
 def analyze_sample(sample_index):
     """
     Predict and display one sample from the test set.
@@ -114,7 +50,14 @@ def analyze_sample(sample_index):
 
 # Call the function by passing the sample index:
 
+# Sample 1
+analyze_sample(666)
 
+# Sample 2
+analyze_sample(777)
+
+# Sample 3
+analyze_sample(888)
 
 ```
 
@@ -123,9 +66,9 @@ The model produced a predicted label for each of the three selected test samples
 
 ### Sample 1
 
-* **Predicted Label:** `6`
-* **True Label:** `6`
-* **Confidence:** `0.9998164`
+* **Predicted Label:** `7`
+* **True Label:** `7`
+* **Confidence:** `0.99839216`
 * **Prediction Status:** `Correct`
 
 ### Sample 2
@@ -147,6 +90,24 @@ The model produced a predicted label for each of the three selected test samples
 ### How the forward pass works:
 Each input sample passes through the network layer by layer. In a typical Dense network, every neuron computes a weighted sum of its inputs plus a bias: `z = W·x + b`. This raw value is then passed to an activation function.
 
+```text
+28 × 28 image
+      ↓
+Flatten layer
+      ↓
+784 pixel values
+      ↓
+Dense layer with 64 neurons
+      ↓
+ReLU activation
+      ↓
+Output layer with 10 neurons
+      ↓
+Softmax activation
+      ↓
+Predicted label
+```
+
 ### Role of ReLU:
 Hidden layers use ReLU (`f(z) = max(0, z)`), which introduces non-linearity while keeping gradients clean for positive values. ReLU allows the network to learn complex patterns without the vanishing gradient problem common with sigmoid or tanh.
 
@@ -157,37 +118,11 @@ The final layer uses Softmax, which converts raw logits into a probability distr
 Adam adapts the learning rate for each weight individually using estimates of first and second moments of the gradients. During training, Adam helped the model converge faster and more stably than standard SGD. The high confidence scores (>0.97) indicate that the weights were well-optimized — Adam guided the model toward a sharp, confident decision boundary for these samples.
 
 ### Why predictions were correct:
-The model likely saw many similar patterns during training. The features that activate strongly in earlier layers (edges, strokes, curves) were reliably mapped to the correct class through the learned weights. No signs of overfitting are evident from these high-confidence correct predictions — the model generalizes well to unseen test samples.
+The model likely saw many similar patterns during training. The features that activate strongly in earlier layers (edges, strokes, curves) were reliably mapped to the correct class through the learned weights. The high confidence scores suggest that Adam's adaptive updates pushed the weights toward a sharp, well-defined decision boundary for these sample classes.
 
 5. Key Takeaway
 The combination of ReLU activations for deep feature extraction and Softmax for probabilistic output, trained with Adam's adaptive updates, enabled the model to make confident and accurate predictions — showing that a well-trained network learns robust internal representations, not just memorized patterns.
 
-هذا هو النص الكامل جاهز للنسخ. ملاحظتان مهمتان قبل رفعه:
-أولاً، في قسم Results، استبدل الأرقام بنتائجك الفعلية بعد تشغيل الكود على الـ dataset اللي تستخدمه (MNIST، CIFAR، إلخ).
-ثانياً، في قسم Analysis، إذا كان عندك sample خاطئ (predicted ≠ true)، أضف جملة مثل: "Sample X was misclassified, possibly due to visual ambiguity between class A and class B, where shared low-level features may have confused the model." — هذا يقوي التحليل كثيراً.
-
-
-
-
-4. Short Analysis
-
-During the **forward pass**, each test sample moves through the model one layer at a time. The input pixels are first transformed using the weights and biases learned during training. Each hidden layer creates a higher-level representation of the image.
-
-The ReLU activation function is used in the hidden layers. It keeps positive activation values and changes negative values to zero:
-
-ReLU(x) = max(0, x)
-
-This introduces non-linearity into the model and allows it to learn complex patterns instead of only simple linear relationships. For image data, earlier neurons may respond to basic patterns such as edges and lines, while later neurons may combine these patterns into shapes that help identify the correct class.
-
-The final layer uses the Softmax activation function. Softmax converts the output scores into a probability distribution across all possible classes. The class with the highest probability becomes the predicted label.
-
-For a correct prediction, the forward pass extracted features that were strongly associated with the true class. As a result, the Softmax output assigned its highest probability to the correct label.
-
-For an incorrect prediction, the sample may contain unclear, unusual, or overlapping features. The extracted representation may therefore be more similar to another class, causing Softmax to assign the highest probability to the wrong label. A high-confidence incorrect prediction means that the model strongly learned a misleading feature pattern.
-
-During training, the Adam optimizer updated the model’s weights using gradients calculated through backpropagation. Adam adapts the update size for each parameter using estimates of the gradients’ average direction and magnitude. This helped the model reduce its loss and learn useful feature patterns efficiently.
-
-However, Adam does not guarantee that every sample will be classified correctly. Its weight updates are based on the overall training data, so uncommon or ambiguous test samples may still be misclassified.
 
 What Happened During the Forward Pass?
 
