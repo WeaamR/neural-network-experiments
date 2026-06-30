@@ -7,114 +7,114 @@ The objective of this task is to examine how the `EarlyStopping` callback contro
 ## 2. Code Used
 
 ```python
-# Experiment 1: Adam optimizer with patience = 3
-early_stopping_3 = keras.callbacks.EarlyStopping(
-    monitor="val_loss",
-    patience=3,
-    restore_best_weights=True,
-    verbose=1
-)
-
-model_patience_3 = create_model(optimizer="adam")
-
-history_patience_3 = model_patience_3.fit(
-    x_train,
-    y_train,
-    epochs=30,
-    validation_data=(x_val, y_val),
-    callbacks=[early_stopping_3],
-    verbose=1
-)
-
-# Find the epoch where training stopped.
-stopped_epoch_3 = len(history_patience_3.history["loss"])
-
-# Find the epoch that achieved the lowest validation loss.
-best_epoch_3 = (
-    np.argmin(history_patience_3.history["val_loss"]) + 1
-)
-
-best_val_loss_3 = np.min(
-    history_patience_3.history["val_loss"]
-)
-
-print("Stopped epoch:", stopped_epoch_3)
-print("Best epoch:", best_epoch_3)
-print("Best validation loss:", best_val_loss_3)
-
-
-# Experiment 2: Adam optimizer with patience = 5
-early_stopping_5 = keras.callbacks.EarlyStopping(
-    monitor="val_loss",
-    patience=5,
-    restore_best_weights=True,
-    verbose=1
-)
-
-model_patience_5 = create_model(optimizer="adam")
-
-history_patience_5 = model_patience_5.fit(
-    x_train,
-    y_train,
-    epochs=30,
-    validation_data=(x_val, y_val),
-    callbacks=[early_stopping_5],
-    verbose=1
-)
-
-stopped_epoch_5 = len(history_patience_5.history["loss"])
-
-best_epoch_5 = (
-    np.argmin(history_patience_5.history["val_loss"]) + 1
-)
-
-best_val_loss_5 = np.min(
-    history_patience_5.history["val_loss"]
-)
-
-print("Stopped epoch:", stopped_epoch_5)
-print("Best epoch:", best_epoch_5)
-print("Best validation loss:", best_val_loss_5)
-
-
-# Experiment 3: SGD optimizer with patience = 3
-sgd_optimizer = keras.optimizers.SGD(
-    learning_rate=0.01
-)
-
-early_stopping_sgd = keras.callbacks.EarlyStopping(
-    monitor="val_loss",
-    patience=3,
-    restore_best_weights=True,
-    verbose=1
-)
-
-model_sgd = create_model(
-    optimizer=sgd_optimizer
-)
-
-history_sgd = model_sgd.fit(
-    x_train,
-    y_train,
-    epochs=50,
-    validation_data=(x_val, y_val),
-    callbacks=[early_stopping_sgd],
-    verbose=1
-)
-
-stopped_epoch_sgd = len(history_sgd.history["loss"])
-
-best_epoch_sgd = (
-    np.argmin(history_sgd.history["val_loss"]) + 1
-)
-
-best_val_loss_sgd = np.min(
-    history_sgd.history["val_loss"]
-)
-
-print("SGD stopped at epoch:", stopped_epoch_sgd)
-print("SGD best epoch:", best_epoch_sgd)
-print("Best validation loss:", best_val_loss_sgd)
+    # Experiment 1: Adam optimizer with patience = 3
+    early_stopping_3 = keras.callbacks.EarlyStopping(
+        monitor="val_loss",
+        patience=3,
+        restore_best_weights=True,
+        verbose=1
+    )
+    
+    model_patience_3 = create_model(optimizer="adam")
+    
+    history_patience_3 = model_patience_3.fit(
+        x_train,
+        y_train,
+        epochs=30,
+        validation_data=(x_val, y_val),
+        callbacks=[early_stopping_3],
+        verbose=1
+    )
+    
+    # Find the epoch where training stopped.
+    stopped_epoch_3 = len(history_patience_3.history["loss"])
+    
+    # Find the epoch that achieved the lowest validation loss.
+    best_epoch_3 = (
+        np.argmin(history_patience_3.history["val_loss"]) + 1
+    )
+    
+    best_val_loss_3 = np.min(
+        history_patience_3.history["val_loss"]
+    )
+    
+    print("Stopped epoch:", stopped_epoch_3)
+    print("Best epoch:", best_epoch_3)
+    print("Best validation loss:", best_val_loss_3)
+    
+    
+    # Experiment 2: Adam optimizer with patience = 5
+    early_stopping_5 = keras.callbacks.EarlyStopping(
+        monitor="val_loss",
+        patience=5,
+        restore_best_weights=True,
+        verbose=1
+    )
+    
+    model_patience_5 = create_model(optimizer="adam")
+    
+    history_patience_5 = model_patience_5.fit(
+        x_train,
+        y_train,
+        epochs=30,
+        validation_data=(x_val, y_val),
+        callbacks=[early_stopping_5],
+        verbose=1
+    )
+    
+    stopped_epoch_5 = len(history_patience_5.history["loss"])
+    
+    best_epoch_5 = (
+        np.argmin(history_patience_5.history["val_loss"]) + 1
+    )
+    
+    best_val_loss_5 = np.min(
+        history_patience_5.history["val_loss"]
+    )
+    
+    print("Stopped epoch:", stopped_epoch_5)
+    print("Best epoch:", best_epoch_5)
+    print("Best validation loss:", best_val_loss_5)
+    
+    
+    # Experiment 3: SGD optimizer with patience = 3
+    sgd_optimizer = keras.optimizers.SGD(
+        learning_rate=0.01
+    )
+    
+    early_stopping_sgd = keras.callbacks.EarlyStopping(
+        monitor="val_loss",
+        patience=3,
+        restore_best_weights=True,
+        verbose=1
+    )
+    
+    model_sgd = create_model(
+        optimizer=sgd_optimizer
+    )
+    
+    history_sgd = model_sgd.fit(
+        x_train,
+        y_train,
+        epochs=50,
+        validation_data=(x_val, y_val),
+        callbacks=[early_stopping_sgd],
+        verbose=1
+    )
+    
+    stopped_epoch_sgd = len(history_sgd.history["loss"])
+    
+    best_epoch_sgd = (
+        np.argmin(history_sgd.history["val_loss"]) + 1
+    )
+    
+    best_val_loss_sgd = np.min(
+        history_sgd.history["val_loss"]
+    )
+    
+    print("SGD stopped at epoch:", stopped_epoch_sgd)
+    print("SGD best epoch:", best_epoch_sgd)
+    print("Best validation loss:", best_val_loss_sgd)
 ```
 
 ## 3. Results
