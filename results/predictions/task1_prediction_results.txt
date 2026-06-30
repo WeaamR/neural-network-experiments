@@ -1,0 +1,18 @@
+Sample index: 666
+Actual value: 7
+Predicted value: 7
+Confidence: 0.9993466734886169
+Result: Correct
+
+Sample index: 777
+Actual value: 1
+Predicted value: 1
+Confidence: 0.9998774528503418
+Result: Correct
+
+Sample index: 888
+Actual value: 2
+Predicted value: 2
+Confidence: 0.9986721277236938
+Result: Correct
+

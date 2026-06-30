@@ -1,0 +1,5 @@
+Task 2 — Custom Image Generalization Test
+Original image: data/custom_digits/task02_original_digit.png
+Preprocessed image: results/predictions/task02_preprocessed_digit.png
+Predicted label: 3
+Confidence: 1.0000
