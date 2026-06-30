@@ -1,9 +1,3 @@
-Paste the following into:
-
-```text
-submission/Task05_Dropout.md
-```
-
 # Task 05 — Dropout Ablation Study
 
 ## 1. Objective
@@ -73,25 +67,17 @@ for dropout_rate in dropout_rates:
 
 ## 4. Short Analysis
 
-### No Dropout
+### No Dropout — clear overfitting:
 
-The model without Dropout achieved the highest training accuracy of `99.73%` and the lowest training loss of `0.0089`. However, its validation loss increased to `0.1296`, while validation accuracy remained lower at `97.36%`.
+The loss gap is by far the widest at 0.1207, and the best validation loss occurred very early, at epoch 5. After that point, training loss kept falling (down to 0.0089) while validation loss climbed back up to 0.1296 — nearly 15× the final training loss. With no regularization, every neuron is free to fit the training set as tightly as possible, including its noise, and the model has no mechanism preventing it from drifting away from generalizable patterns once it passes the optimal point.
 
-The model achieved its best validation loss at epoch `5`, but continued improving only on the training data afterward. This large separation between training and validation performance indicates clear overfitting.
+### Dropout = 0.1 — partial regularization:
 
-### Dropout = 0.1
+The gap shrinks substantially to 0.0663, and the best epoch shifts later, to epoch 8 — dropout slowed the rate at which the model overfits, buying more useful training time. Final validation loss (0.1007) is noticeably lower than the no-dropout run, even though final training loss is higher (0.0344 vs 0.0089). This is the regularization tradeoff in action: a worse fit to training data in exchange for a better fit to unseen data.
 
-Using a Dropout rate of `0.1` reduced overfitting while preserving strong training performance. The final validation loss decreased to `0.1007`, and the model achieved the highest final validation accuracy of `97.50%`.
+### Dropout = 0.3 — best generalization, near-zero gap:
 
-Its best validation loss was `0.0858` at epoch `8`. This configuration provided a good balance between fitting the training data and generalizing to unseen validation data.
-
-### Dropout = 0.3
-
-A Dropout rate of `0.3` applied stronger regularization. Its training loss increased to `0.0888`, and training accuracy decreased to `97.09%`, because 30% of the hidden neurons were randomly disabled during each training step.
-
-Despite the lower training performance, the model maintained a validation accuracy of `97.46%` and achieved the lowest best validation loss, `0.0853`, at epoch `12`. This shows that stronger Dropout significantly limited overfitting while maintaining good generalization.
-
-The validation accuracy was slightly higher than the training accuracy because Dropout was active during training but disabled during validation. During validation, the complete network was available for prediction.
+This configuration achieves the smallest loss gap of all three at just 0.0056, meaning training and validation loss converge to nearly the same value (0.0888 vs 0.0944). This is a strong sign of a well-regularized model: the network is no longer significantly outperforming itself on data it has memorized versus data it hasn't seen. The best epoch is also the latest of the three (epoch 12), showing dropout extended useful training time the most by continuously preventing the network from prematurely converging on memorized patterns. Despite having the highest final training loss of the three runs, this configuration achieved the best validation performance overall — both in terms of the lowest best validation loss (0.0853) and the tightest train-validation alignment.
 
 ### Comparison of Overfitting
 
@@ -107,66 +93,14 @@ However, training and validation losses under Dropout are not perfectly comparab
 
 ### How Dropout Prevents Neuron Co-adaptation
 
-Without Dropout, some neurons may become dependent on specific other neurons. They learn to work together as one fixed combination rather than learning useful features independently. This behavior is called **neuron co-adaptation**.
+During training, Dropout randomly zeroes out a fraction of neuron outputs in a layer on each forward pass, forcing the remaining active neurons to produce useful outputs without relying on any specific combination of other neurons being present.
 
-During training, Dropout randomly disables a fraction of the hidden neurons:
+This breaks the tendency of neurons to co-adapt, where groups of neurons learn to compensate for each other’s specific errors rather than learning independently useful features.
 
-```text
-Dropout = 0.1 → approximately 10% disabled
-Dropout = 0.3 → approximately 30% disabled
-```
+Because the active subnetwork changes randomly during training, the network can be viewed approximately as an ensemble of many overlapping subnetworks that share the same weights. Each subnetwork is encouraged to learn robust and redundant representations.
 
-Because a neuron cannot depend on the same neighboring neurons in every training step, it must learn features that remain useful under different network configurations.
-
-This encourages the network to learn more independent and robust representations. As a result, the model becomes less dependent on specific training patterns and generalizes better to unseen data.
+The progression observed across the three experiments—a shrinking loss gap, a later best epoch, and close training–validation loss alignment with `Dropout = 0.3`—is consistent with the regularization effect becoming stronger as the Dropout rate increases.
 
 ## 5. Key Takeaway
 
 Dropout reduced overfitting by preventing neurons from relying on fixed combinations of other neurons. A Dropout rate of `0.1` achieved the highest final validation accuracy, while `0.3` provided the strongest regularization and the lowest best validation loss.
-
-
-
-
-
------------------------------------------------
-### 4. Short Analysis
-
-#### No Dropout
-
-The model without Dropout achieved the highest training accuracy, `99.73%`, and the lowest training loss, `0.0089`. However, its validation loss increased to `0.1296`, producing the largest loss gap of `0.1207`.
-
-This indicates strong overfitting. The model continued fitting the training data after reaching its best validation loss at epoch `5`, but its ability to generalize did not improve.
-
-#### Dropout = 0.1
-
-Using a Dropout rate of `0.1` reduced overfitting. The final validation loss decreased to `0.1007`, while the loss gap dropped to `0.0663`.
-
-The model achieved the highest final validation accuracy, `97.50%`, and reached its best validation loss of `0.0858` at epoch `8`. This configuration provided a good balance between training performance and generalization.
-
-#### Dropout = 0.3
-
-A Dropout rate of `0.3` produced the smallest loss gap, only `0.0055`, indicating the strongest reduction in overfitting.
-
-The training loss was higher at `0.0888`, and training accuracy decreased to `97.09%`, because 30% of the hidden neurons were randomly disabled during training. However, validation accuracy remained strong at `97.46%`, and this configuration achieved the lowest best validation loss, `0.0853`, at epoch `12`.
-
-The validation accuracy was slightly higher than the training accuracy because Dropout is active during training but disabled during validation. Therefore, the full network is used when evaluating the validation data.
-
-### Comparison of Overfitting
-
-| Configuration | Final Loss Gap | Overfitting Level |
-| ------------- | -------------: | ----------------- |
-| No Dropout    |         0.1207 | High              |
-| Dropout = 0.1 |         0.0663 | Moderate          |
-| Dropout = 0.3 |         0.0055 | Very low          |
-
-### How Dropout Encourages Robust Representations
-
-Without Dropout, neurons can become highly dependent on specific other neurons. This is known as neuron co-adaptation.
-
-Dropout randomly disables some neurons during each training step, preventing the network from relying on one fixed combination of features. As a result, neurons must learn features that remain useful even when other neurons are unavailable.
-
-This encourages more independent and robust internal representations, improves generalization, and reduces overfitting.
-
-### 5. Key Takeaway
-
-Dropout reduced overfitting by preventing neuron co-adaptation. A rate of `0.1` achieved the highest final validation accuracy, while `0.3` produced the smallest loss gap and the lowest best validation loss.
