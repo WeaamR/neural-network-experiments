@@ -1,0 +1,58 @@
+Task 07 — Optimizer Comparison Challenge
+==================================================
+
+SGD
+Final Training Loss:              0.1245
+Final Validation Loss:            0.1100
+Final Training Accuracy:          0.9650
+Final Validation Accuracy:        0.9694
+Best Validation Loss:             0.1100
+Best Validation Loss Epoch:       20
+Best Validation Accuracy:         0.9694
+Best Validation Accuracy Epoch:   20
+Final Loss Gap:                   -0.0145
+Convergence Epoch:                20
+Final 5-Epoch Validation Loss STD:0.003850
+Training Time:                    97.94 seconds
+
+SGD with Momentum
+Final Training Loss:              0.0147
+Final Validation Loss:            0.0893
+Final Training Accuracy:          0.9980
+Final Validation Accuracy:        0.9732
+Best Validation Loss:             0.0816
+Best Validation Loss Epoch:       10
+Best Validation Accuracy:         0.9756
+Best Validation Accuracy Epoch:   8
+Final Loss Gap:                   0.0746
+Convergence Epoch:                8
+Final 5-Epoch Validation Loss STD:0.000724
+Training Time:                    95.27 seconds
+
+Adam
+Final Training Loss:              0.0083
+Final Validation Loss:            0.1304
+Final Training Accuracy:          0.9979
+Final Validation Accuracy:        0.9752
+Best Validation Loss:             0.0986
+Best Validation Loss Epoch:       4
+Best Validation Accuracy:         0.9752
+Best Validation Accuracy Epoch:   20
+Final Loss Gap:                   0.1221
+Convergence Epoch:                4
+Final 5-Epoch Validation Loss STD:0.001615
+Training Time:                    106.35 seconds
+
+AdamW
+Final Training Loss:              0.0078
+Final Validation Loss:            0.1401
+Final Training Accuracy:          0.9983
+Final Validation Accuracy:        0.9728
+Best Validation Loss:             0.0995
+Best Validation Loss Epoch:       5
+Best Validation Accuracy:         0.9754
+Best Validation Accuracy Epoch:   19
+Final Loss Gap:                   0.1322
+Convergence Epoch:                4
+Final 5-Epoch Validation Loss STD:0.007796
+Training Time:                    105.89 seconds
