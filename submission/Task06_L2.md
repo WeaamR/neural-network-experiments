@@ -124,6 +124,7 @@ with open(results_file, "w", encoding="utf-8") as f:
         f.write(line)
 
 print(f"Results saved to: {results_file}")
+
 ```
 
 ## 3. Results
@@ -184,6 +185,7 @@ The final loss gap was negative:
 
 ```text
 0.2347 - 0.2512 = -0.0165
+```
 
 This does not mean that the model achieved perfect generalization. The training loss reported during an epoch is averaged while the model weights are continuously changing, whereas the validation loss is calculated after the epoch using the final updated weights. Therefore, validation loss can occasionally be slightly lower than training loss even without Dropout.
 
@@ -191,7 +193,7 @@ This does not mean that the model achieved perfect generalization. The training 
 
 L2 regularization adds a penalty based on the squared magnitude of the weights:
 
-Total Loss = Classification Loss + λ × Σ(w²)
+$$ Total Loss = Classification Loss + λ × Σ(w²) $$
 
 When a weight becomes large, its squared value contributes more strongly to the penalty.
 
@@ -203,13 +205,13 @@ Large weight
 
 The experimental results clearly demonstrate this effect:
 
-L2 = 0.0001 → Weight Norm = 18.2197
-L2 = 0.001  → Weight Norm = 7.8453
-L2 = 0.01   → Weight Norm = 3.2773
+L2 = 0.0001 **→** Weight Norm = 18.2197
+L2 = 0.001  **→** Weight Norm = 7.8453
+L2 = 0.01   **→** Weight Norm = 3.2773
 
 As the L2 coefficient increased, the magnitude of the hidden-layer weights consistently decreased.
 
-7. Why Smaller Weights Can Improve Generalization
+### 6. Why Smaller Weights Can Improve Generalization
 
 Large weights can make the model highly sensitive to small changes in the input.
 
@@ -226,7 +228,7 @@ As a result, moderate L2 regularization can reduce overfitting and improve gener
 
 However, smaller weights are not always better. When the L2 penalty is too strong, important weights are also restricted, which can prevent the model from learning useful representations. This occurred with L2 = 0.01.
 
-8. Effect of L2 on the Validation Loss Trend
+### 7. Effect of L2 on the Validation Loss Trend
 
 With L2 = 0.0001, validation loss decreased quickly but later remained almost constant while training loss continued decreasing. This indicates that weak regularization did not completely prevent overfitting.
 
@@ -236,7 +238,7 @@ With L2 = 0.01, validation loss continued decreasing slowly and did not show a s
 
 Therefore, stronger L2 regularization made the validation curve more stable, but excessive regularization increased the overall loss and caused underfitting.
 
-9. Important Interpretation of the Loss Values
+### 8. Important Interpretation of the Loss Values
 
 In Keras, the reported loss includes the L2 penalty:
 
@@ -245,6 +247,7 @@ Reported Loss
 Classification Loss
 +
 L2 Penalty
+
 
 Therefore, the losses from different L2 values are not purely classification errors.
 
