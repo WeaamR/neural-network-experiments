@@ -1,0 +1,53 @@
+Task 08 — Batch Size & Gradient Noise Experiment
+=======================================================
+
+Batch Size = 8
+Final Training Loss:               0.0120
+Final Validation Loss:             0.1608
+Final Training Accuracy:           0.9959
+Final Validation Accuracy:         0.9760
+Best Validation Loss:              0.0942
+Best Validation Loss Epoch:        4
+Best Validation Accuracy:          0.9760
+Best Validation Accuracy Epoch:    20
+Final Loss Gap:                    0.1488
+Steps Per Epoch:                   6875
+Total Parameter Updates:           137500
+Convergence Epoch:                 4
+Final-Epoch Batch Loss STD:        0.001211
+Final 5-Epoch Validation Loss STD: 0.018815
+Training Time:                     362.47 seconds
+
+Batch Size = 32
+Final Training Loss:               0.0083
+Final Validation Loss:             0.1304
+Final Training Accuracy:           0.9979
+Final Validation Accuracy:         0.9752
+Best Validation Loss:              0.0986
+Best Validation Loss Epoch:        4
+Best Validation Accuracy:          0.9752
+Best Validation Accuracy Epoch:    20
+Final Loss Gap:                    0.1221
+Steps Per Epoch:                   1719
+Total Parameter Updates:           34380
+Convergence Epoch:                 4
+Final-Epoch Batch Loss STD:        0.000861
+Final 5-Epoch Validation Loss STD: 0.001615
+Training Time:                     99.35 seconds
+
+Batch Size = 128
+Final Training Loss:               0.0228
+Final Validation Loss:             0.1050
+Final Training Accuracy:           0.9951
+Final Validation Accuracy:         0.9690
+Best Validation Loss:              0.0905
+Best Validation Loss Epoch:        10
+Best Validation Accuracy:          0.9744
+Best Validation Accuracy Epoch:    9
+Final Loss Gap:                    0.0822
+Steps Per Epoch:                   430
+Total Parameter Updates:           8600
+Convergence Epoch:                 8
+Final-Epoch Batch Loss STD:        0.001224
+Final 5-Epoch Validation Loss STD: 0.003218
+Training Time:                     32.76 seconds
