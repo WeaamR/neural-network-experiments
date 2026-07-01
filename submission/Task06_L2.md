@@ -195,76 +195,49 @@ L2 regularization adds a penalty based on the squared magnitude of the weights:
 
 $$ Total Loss = Classification Loss + λ × Σ(w²) $$
 
-When a weight becomes large, its squared value contributes more strongly to the penalty.
+When a weight becomes large, its squared value contributes more strongly to the penalty. During backpropagation, this adds pressure that pulls the weights toward smaller values:
 
-During backpropagation, this adds pressure that pulls the weights toward smaller values:
-
-Large weight
-→ Larger penalty
-→ Stronger reduction
+Large weight → Larger penalty → Stronger reduction
 
 The experimental results clearly demonstrate this effect:
 
-L2 = 0.0001 **→** Weight Norm = 18.2197
-L2 = 0.001  **→** Weight Norm = 7.8453
-L2 = 0.01   **→** Weight Norm = 3.2773
+- L2 = 0.0001 **→** Weight Norm = 18.2197
+- L2 = 0.001  **→** Weight Norm = 7.8453
+- L2 = 0.01   **→** Weight Norm = 3.2773
 
 As the L2 coefficient increased, the magnitude of the hidden-layer weights consistently decreased.
 
 ### 6. Why Smaller Weights Can Improve Generalization
 
-Large weights can make the model highly sensitive to small changes in the input.
-
-For example, a minor change in a pixel value may produce a large change in the output when the associated weight is very large.
+Large weights can make the model highly sensitive to small changes in the input. For example, a minor change in a pixel value may produce a large change in the output when the associated weight is very large.
 
 Smaller weights generally create a smoother and less sensitive decision function:
 
-Small input change
-→ Smaller output change
+`Small input change → Smaller output change`
 
-This reduces the model’s tendency to rely on noise or highly specific details from the training set.
-
-As a result, moderate L2 regularization can reduce overfitting and improve generalization.
+This reduces the model’s tendency to rely on noise or highly specific details from the training set. As a result, moderate L2 regularization can reduce overfitting and improve generalization.
 
 However, smaller weights are not always better. When the L2 penalty is too strong, important weights are also restricted, which can prevent the model from learning useful representations. This occurred with L2 = 0.01.
 
 ### 7. Effect of L2 on the Validation Loss Trend
 
-With L2 = 0.0001, validation loss decreased quickly but later remained almost constant while training loss continued decreasing. This indicates that weak regularization did not completely prevent overfitting.
+**With L2 = 0.0001,** validation loss decreased quickly but later remained almost constant while training loss continued decreasing. This indicates that weak regularization did not completely prevent overfitting.
 
-With L2 = 0.001, the training and validation curves were closer, and the validation-loss trend was more stable. This suggests stronger control over overfitting, although the absolute validation loss was higher.
+**With L2 = 0.001,** the training and validation curves were closer, and the validation-loss trend was more stable. This suggests stronger control over overfitting, although the absolute validation loss was higher.
 
-With L2 = 0.01, validation loss continued decreasing slowly and did not show a strong late increase. However, it remained high throughout training because the model was excessively constrained.
+**With L2 = 0.01,** validation loss continued decreasing slowly and did not show a strong late increase. However, it remained high throughout training because the model was excessively constrained.
 
 Therefore, stronger L2 regularization made the validation curve more stable, but excessive regularization increased the overall loss and caused underfitting.
 
-### 8. Important Interpretation of the Loss Values
+### 8. Key Takeaway
 
-In Keras, the reported loss includes the L2 penalty:
+Increasing the L2 coefficient consistently reduced the magnitude of the model weights:
 
-Reported Loss
-=
-Classification Loss
-+
-L2 Penalty
+- `L2 = 0.0001` produced the largest weight norm and the best validation accuracy, but some overfitting remained.
+- `L2 = 0.001` reduced the weight magnitude and narrowed the training–validation gap, providing stronger regularization.
+- `L2 = 0.01` produced the smallest weights, but the regularization was too strong and caused underfitting.
 
+The experiment shows that smaller weights can improve generalization by making the model less sensitive to noise and training-specific patterns. However, excessive L2 regularization can restrict the model too much and reduce its ability to learn useful features.
 
-Therefore, the losses from different L2 values are not purely classification errors.
+Among the tested values, `L2 = 0.0001` achieved the best validation performance, while `L2 = 0.001` provided a stronger balance between reducing weight magnitude and limiting overfitting.
 
-A stronger L2 value naturally adds a larger penalty to the reported loss. For this reason, validation loss should be interpreted together with:
-
-Validation accuracy.
-Weight L2 norm.
-Training and validation curves.
-Evidence of overfitting or underfitting.
-10. Key Takeaway
-
-Increasing the L2 coefficient consistently reduced the magnitude of the model weights.
-
-L2 = 0.0001 achieved the best validation loss and validation accuracy, but still showed some overfitting.
-
-L2 = 0.001 produced smaller weights and a smaller train–validation gap, but slightly reduced predictive performance.
-
-L2 = 0.01 produced the smallest weights and strongest regularization, but the penalty was too strong and caused underfitting.
-
-Among the tested values, L2 = 0.0001 provided the best validation performance, while L2 = 0.001 provided a stronger balance between weight control and reduced overfitting.
