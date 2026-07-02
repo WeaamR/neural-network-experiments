@@ -21,30 +21,138 @@ All models used the same dataset, architecture, random seed, batch size, and num
 
 ---
 
-## 2. Optimizer Configurations
+## 2. Code Used
 
 ```python
-SGD:
-keras.optimizers.SGD(
-    learning_rate=0.01
-)
+def create_optimizer(optimizer_name):
+    # Return a new optimizer instance for each experiment.
+    optimizers = {
+        "SGD":          keras.optimizers.SGD(learning_rate=0.01),
+        "SGD_Momentum": keras.optimizers.SGD(learning_rate=0.01, momentum=0.9),
+        "Adam":         keras.optimizers.Adam(),
+        "AdamW":        keras.optimizers.AdamW(weight_decay=0.0001)
+    }
+    return optimizers[optimizer_name]
 
-SGD with Momentum:
-keras.optimizers.SGD(
-    learning_rate=0.01,
-    momentum=0.9
-)
 
-Adam:
-keras.optimizers.Adam(
-    learning_rate=0.001
-)
+def create_optimizer_model(optimizer_name, seed=42):
+    # Create a fresh model using the selected optimizer.
+    # Every experiment uses the same architecture and seed.
 
-AdamW:
-keras.optimizers.AdamW(
-    learning_rate=0.001,
-    weight_decay=0.0001
-)
+    # Reset the random seed so models start with the same initial weights.
+    keras.utils.set_random_seed(seed)
+
+    model = keras.Sequential([
+        keras.layers.Input(shape=(28, 28)),
+        keras.layers.Flatten(),
+        keras.layers.Dense(64, activation="relu"),
+        keras.layers.Dense(10, activation="softmax")
+    ])
+
+    model.compile(
+        optimizer=create_optimizer(optimizer_name),
+        loss="sparse_categorical_crossentropy",
+        metrics=["accuracy"]
+    )
+    return model
+
+
+def plot_curves(history, optimizer_name, metric):
+    # Plot and save training vs validation curves for a given metric.
+    display_name = optimizer_name.replace("_", " with ")
+    file_name = optimizer_name.lower().replace("_", "-")
+    epoch_range = range(1, len(history.history[metric]) + 1)
+
+    plt.figure(figsize=(7, 5))
+
+    plt.plot(
+        epoch_range,
+        history.history[metric],
+        label=f"Training {metric.capitalize()}"
+    )
+
+    plt.plot(
+        epoch_range,
+        history.history[f"val_{metric}"],
+        label=f"Validation {metric.capitalize()}"
+    )
+
+    plt.title(f"{metric.capitalize()} Curves — {display_name}")
+    plt.xlabel("Epoch")
+    plt.ylabel(metric.capitalize())
+    plt.legend()
+    plt.grid()
+
+    output_path = task7_results_dir / f"{file_name}_{metric}.png"
+
+    # Save the figure before displaying it.
+    plt.savefig(output_path, dpi=300, bbox_inches="tight")
+    plt.show()
+    plt.close()
+
+    print(f"Saved: {output_path}")
+
+
+# Train all four optimizer configurations.
+optimizer_names = ["SGD", "SGD_Momentum", "Adam", "AdamW"]
+optimizer_results = {}
+
+for optimizer_name in optimizer_names:
+
+    # Create a fresh model for this optimizer.
+    model = create_optimizer_model(optimizer_name, seed=42)
+
+    # Record the training time.
+    start_time = time.time()
+
+    history = model.fit(
+        x_train,
+        y_train,
+        epochs=20,
+        batch_size=32,
+        validation_data=(x_val, y_val),
+        shuffle=True,
+        verbose=1
+    )
+
+    training_time = time.time() - start_time
+
+    # Plot and save loss and accuracy curves.
+    plot_curves(history, optimizer_name, "loss")
+    plot_curves(history, optimizer_name, "accuracy")
+
+    # Find the lowest validation loss.
+    best_val_loss = np.min(history.history["val_loss"])
+
+    # Find the epoch that achieved the lowest validation loss.
+    best_epoch = np.argmin(history.history["val_loss"]) + 1
+
+    # Estimate convergence speed:
+    # First epoch whose validation loss is within 1% of the best
+    # validation loss.
+    convergence_epoch = next(
+        i + 1
+        for i, value in enumerate(history.history["val_loss"])
+        if value <= best_val_loss * 1.01
+    )
+
+    # Measure validation-loss stability over the final five epochs.
+    validation_loss_std = np.std(
+        history.history["val_loss"][-5:]
+    )
+
+    # Store the results needed for comparison.
+    optimizer_results[optimizer_name] = {
+        "final_train_loss": history.history["loss"][-1],
+        "final_val_loss": history.history["val_loss"][-1],
+        "final_train_accuracy": history.history["accuracy"][-1],
+        "final_val_accuracy": history.history["val_accuracy"][-1],
+        "best_val_loss": best_val_loss,
+        "best_epoch": best_epoch,
+        "convergence_epoch": convergence_epoch,
+        "validation_loss_std": validation_loss_std,
+        "training_time": training_time
+    }
 ```
 
 Each model was trained for `20` epochs using a batch size of `32`.
@@ -72,8 +180,6 @@ Training times were similar:
 | AdamW | 104.68 seconds |
 
 The small time differences may be influenced by the Colab runtime and should not be treated as precise optimizer benchmarks.
-
-> The current experiment code stores the best validation loss and its epoch, but it does not store the best validation accuracy or its epoch. Therefore, those two columns were not included in the results table.
 
 ---
 
