@@ -20,7 +20,163 @@ All other settings, including the model architecture, optimizer, learning rate, 
 
 ---
 
-## 2. Results
+## 2.  Code Used
+
+```python
+# Create a directory for Task 8 results.
+
+def create_batch_size_model(seed=42):
+
+    # Ensure reproducible initial weights.
+    keras.utils.set_random_seed(seed)
+
+    model = keras.Sequential([
+        keras.layers.Input(shape=(28, 28)),
+
+        # Convert each 28×28 image into 784 values.
+        keras.layers.Flatten(),
+
+        # Hidden layer.
+        keras.layers.Dense(64, activation="relu"),
+
+        # Output layer for digits 0–9.
+        keras.layers.Dense(10, activation="softmax")
+    ])
+
+    model.compile(
+        optimizer="adam",
+        loss="sparse_categorical_crossentropy",
+        metrics=["accuracy"]
+    )
+    return model
+
+
+def plot_curves(history, label, save_dir, file_prefix, metric):
+    # Plot and save training vs validation curves for a given metric.
+    epoch_range = range(1, len(history.history[metric]) + 1)
+
+    plt.figure(figsize=(7, 5))
+    plt.plot(epoch_range, history.history[metric],          label=f"Training {metric.capitalize()}")
+    plt.plot(epoch_range, history.history[f"val_{metric}"], label=f"Validation {metric.capitalize()}")
+    plt.title(f"{metric.capitalize()} Curves — {label}")
+    plt.xlabel("Epoch")
+    plt.ylabel(metric.capitalize())
+    plt.legend()
+    plt.grid()
+
+    output_path = save_dir / f"{file_prefix}_{metric}.png"
+
+    # Save the figure before displaying it.
+    plt.savefig(output_path, dpi=300, bbox_inches="tight")
+    plt.show()
+    plt.close()
+    print(f"Saved: {output_path}")
+
+
+# Train all three batch-size configurations.
+batch_sizes      = [8, 32, 128]
+number_of_epochs = 20
+batch_histories  = {}
+batch_results    = {}
+
+for batch_size in batch_sizes:
+
+    label       = f"Batch Size = {batch_size}"
+    file_prefix = f"batch_{batch_size}"
+
+    # Create a fresh model for this experiment.
+    model = create_batch_size_model(seed=42)
+
+    # Calculate the number of weight updates per epoch.
+    steps_per_epoch = math.ceil(len(x_train) / batch_size)
+
+    # Measure the total training time.
+    start_time = time.time()
+
+    history = model.fit(
+        x_train, y_train,
+        epochs=number_of_epochs,
+        batch_size=batch_size,
+        validation_data=(x_val, y_val),
+        shuffle=True,
+        verbose=1
+    )
+
+    training_time = time.time() - start_time
+
+    # Store the history for the comparison plot.
+    batch_histories[batch_size] = history
+
+    # Create and save the loss and accuracy plots.
+    plot_curves(history, label, task8_results_dir, file_prefix, "loss")
+    plot_curves(history, label, task8_results_dir, file_prefix, "accuracy")
+
+    # Find the lowest validation loss and its epoch.
+    best_val_loss       = np.min(history.history["val_loss"])
+    best_val_loss_epoch = np.argmin(history.history["val_loss"]) + 1
+
+    # Measure validation-loss variation over the final five epochs.
+    final_five_val_loss_std = np.std(history.history["val_loss"][-5:])
+
+    # Store the main results needed for comparison.
+    batch_results[batch_size] = {
+        "final_train_loss":       history.history["loss"][-1],
+        "final_val_loss":         history.history["val_loss"][-1],
+        "final_val_accuracy":     history.history["val_accuracy"][-1],
+        "best_val_loss":          best_val_loss,
+        "best_val_loss_epoch":    best_val_loss_epoch,
+        "steps_per_epoch":        steps_per_epoch,
+        "final_five_val_loss_std":final_five_val_loss_std,
+        "training_time":          training_time
+    }
+
+
+# Plot validation-loss comparison across all batch sizes.
+plt.figure(figsize=(8, 5))
+for batch_size, history in batch_histories.items():
+    epoch_range = range(1, len(history.history["val_loss"]) + 1)
+    plt.plot(epoch_range, history.history["val_loss"], label=f"Batch Size = {batch_size}")
+
+plt.title("Validation Loss Comparison")
+plt.xlabel("Epoch")
+plt.ylabel("Validation Loss")
+plt.legend()
+plt.grid()
+
+comparison_path = task8_results_dir / "batch_size_validation_loss_comparison.png"
+plt.savefig(comparison_path, dpi=300, bbox_inches="tight")
+plt.show()
+plt.close()
+print(f"Saved: {comparison_path}")
+
+
+# Print and save all results.
+results_file = task8_results_dir / "task08_batch_size_results.txt"
+
+with open(results_file, "w", encoding="utf-8") as f:
+    f.write("Task 08 — Batch Size & Gradient Noise Experiment\n")
+    f.write("=" * 55 + "\n")
+
+    for batch_size, r in batch_results.items():
+        line = (
+            f"\nBatch Size = {batch_size}\n"
+            f"Final Training Loss:               {r['final_train_loss']:.4f}\n"
+            f"Final Validation Loss:             {r['final_val_loss']:.4f}\n"
+            f"Final Validation Accuracy:         {r['final_val_accuracy']:.4f}\n"
+            f"Best Validation Loss:              {r['best_val_loss']:.4f}\n"
+            f"Best Validation Loss Epoch:        {r['best_val_loss_epoch']}\n"
+            f"Steps Per Epoch:                   {r['steps_per_epoch']}\n"
+            f"Final 5-Epoch Validation Loss STD: {r['final_five_val_loss_std']:.6f}\n"
+            f"Training Time:                     {r['training_time']:.2f} seconds\n"
+        )
+        print(line)
+        f.write(line)
+
+print(f"Results saved to: {results_file}")
+```
+---
+
+## 3. Results
 
 | Batch Size | Final Train Loss | Final Val Loss | Final Val Accuracy | Best Val Loss | Best Epoch | Steps per Epoch | Final 5-Epoch Val-Loss STD | Training Time |
 |-----------:|-----------------:|---------------:|-------------------:|--------------:|-----------:|----------------:|---------------------------:|--------------:|
