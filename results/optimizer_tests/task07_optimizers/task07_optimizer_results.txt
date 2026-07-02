@@ -1,0 +1,46 @@
+Task 07 — Optimizer Comparison Challenge
+==================================================
+
+SGD
+Final Training Loss:               0.1245
+Final Validation Loss:             0.1101
+Final Training Accuracy:           0.9650
+Final Validation Accuracy:         0.9694
+Best Validation Loss:              0.1101
+Best Validation Loss Epoch:        20
+Convergence Epoch:                 20
+Final 5-Epoch Validation Loss STD: 0.003842
+Training Time:                     109.03 seconds
+
+SGD with Momentum
+Final Training Loss:               0.0147
+Final Validation Loss:             0.0891
+Final Training Accuracy:           0.9980
+Final Validation Accuracy:         0.9744
+Best Validation Loss:              0.0814
+Best Validation Loss Epoch:        10
+Convergence Epoch:                 9
+Final 5-Epoch Validation Loss STD: 0.000657
+Training Time:                     96.97 seconds
+
+Adam
+Final Training Loss:               0.0083
+Final Validation Loss:             0.1530
+Final Training Accuracy:           0.9979
+Final Validation Accuracy:         0.9714
+Best Validation Loss:              0.0986
+Best Validation Loss Epoch:        4
+Convergence Epoch:                 4
+Final 5-Epoch Validation Loss STD: 0.009132
+Training Time:                     102.46 seconds
+
+AdamW
+Final Training Loss:               0.0091
+Final Validation Loss:             0.1370
+Final Training Accuracy:           0.9977
+Final Validation Accuracy:         0.9736
+Best Validation Loss:              0.0985
+Best Validation Loss Epoch:        4
+Convergence Epoch:                 4
+Final 5-Epoch Validation Loss STD: 0.003487
+Training Time:                     104.68 seconds
