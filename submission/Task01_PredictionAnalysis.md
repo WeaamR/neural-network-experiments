@@ -71,12 +71,16 @@ The model produced a predicted label for each of the three selected test samples
 * **Confidence:** `0.99839216`
 * **Prediction Status:** `Correct`
 
+The model assigned approximately 99.8392% probability to class 7.
+
 ### Sample 2
 
 * **Predicted Label:** `1`
 * **True Label:** `1`
 * **Confidence:** `0.99873286`
 * **Prediction Status:** `Correct`
+
+The model assigned approximately 99.8733% probability to class 1.
 
 ### Sample 3
 
@@ -85,9 +89,12 @@ The model produced a predicted label for each of the three selected test samples
 * **Confidence:** `0.99996984`
 * **Prediction Status:** `Correct`
 
-## 4. Short Analysis
+The model assigned approximately 99.9970% probability to class 2.
 
-### How the forward pass works:
+## 4. Short Analysis — Prediction Process
+
+### 4.1 Forward Pass
+
 Each input sample passes through the network layer by layer. In a typical Dense network, every neuron computes a weighted sum of its inputs plus a bias: `z = W·x + b`. This raw value is then passed to an activation function.
 
 ```text
@@ -105,19 +112,21 @@ Output layer with 10 neurons
       ↓
 Softmax activation
       ↓
+Probability distribution
+      ↓
 Predicted label
 ```
 
-### Role of ReLU:
+### 4.2 Role of ReLU:
 Hidden layers use ReLU (`f(z) = max(0, z)`), which introduces non-linearity while keeping gradients clean for positive values. ReLU allows the network to learn complex patterns without the vanishing gradient problem common with sigmoid or tanh.
 
-### Role of Softmax:
+### 4.3 Role of Softmax:
 The final layer uses Softmax, which converts raw logits into a probability distribution across all classes. The class with the highest probability becomes the predicted label. This is why we use `np.argmax()` on the output — we're selecting the most confident class.
 
-### Adam optimizer's influence:
+### 4.4 Adam optimizer's influence:
 Adam adapts the learning rate for each weight individually using estimates of first and second moments of the gradients. During training, Adam helped the model converge faster and more stably than standard SGD. The high confidence scores (>0.97) indicate that the weights were well-optimized — Adam guided the model toward a sharp, confident decision boundary for these samples.
 
-### Why predictions were correct:
+### 4.5 Why predictions were correct:
 The model likely saw many similar patterns during training. The features that activate strongly in earlier layers (edges, strokes, curves) were reliably mapped to the correct class through the learned weights. The high confidence scores suggest that Adam's adaptive updates pushed the weights toward a sharp, well-defined decision boundary for these sample classes.
 
 ## 5. Key Takeaway
