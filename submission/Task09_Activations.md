@@ -2,28 +2,24 @@
 
 ## 1. Objective
 
-The objective of this experiment is to compare different activation functions in the hidden layer of the same neural network model.
+This task compares four activation functions in the hidden layer:
 
-The original model used `ReLU`. In this task, the activation function was replaced with:
+- ReLU
+- Tanh
+- Softsign
+- GELU
 
-- `Tanh`
-- `Softsign`
-- `GELU`
-
-The comparison focuses on:
-
-- How each activation affects gradient flow.
-- Which activations may suffer from vanishing gradients.
-- Why GELU performs well in Transformer architectures.
-- Why ReLU remains preferred in many MLP and CNN models.
-
-All models used the same dataset, architecture, optimizer, learning rate, batch size, number of epochs, and random seed.
+The goal is to observe how each activation affects training behavior, validation performance, gradient flow, and overfitting.
 
 ---
 
 ## 2. Code Used
 
 ```python
+# Create the results directory.
+task9_results_dir = Path("results/activation_tests/task09_activations")
+task9_results_dir.mkdir(parents=True, exist_ok=True)
+
 # Define the activation functions to compare.
 activation_functions = {
     "ReLU":     keras.activations.relu,
@@ -33,27 +29,17 @@ activation_functions = {
 }
 
 def create_activation_model(activation_function, seed=42):
-
-    # Clear the previous model from memory.
-    keras.backend.clear_session()
-
-    # Ensure that every model starts with the same initial weights.
     keras.utils.set_random_seed(seed)
 
     model = keras.Sequential([
         keras.layers.Input(shape=(28, 28)),
-
-        # Convert the image into 784 pixel values.
         keras.layers.Flatten(),
 
-        # The activation function changes in each experiment.
         keras.layers.Dense(
             64,
             activation=activation_function,
             name="hidden_dense"
         ),
-
-        # Output probabilities for digits 0–9.
         keras.layers.Dense(10, activation="softmax")
     ])
 
@@ -138,7 +124,6 @@ for activation_name, activation_function in activation_functions.items():
     # Store the training history.
     activation_histories[activation_name] = history
 
-    # Save loss plots.
     plot_loss_curves(history, activation_name)
 
     # Calculate gradient norm after training.
@@ -161,61 +146,42 @@ for activation_name, activation_function in activation_functions.items():
     }
 
 
-# Plot validation-loss comparison across all activations.
-plt.figure(figsize=(8, 5))
+# Print and save all results.
+results_file = task9_results_dir / "task09_activation_results.txt"
 
-for activation_name, history in activation_histories.items():
-    epoch_range = range(1, len(history.history["val_loss"]) + 1)
-    plt.plot(epoch_range, history.history["val_loss"], label=activation_name)
+with open(results_file, "w", encoding="utf-8") as f:
+    f.write("Task 09 — Activation Function Comparison\n")
+    f.write("=" * 50 + "\n")
 
-plt.title("Validation Loss Comparison")
-plt.xlabel("Epoch")
-plt.ylabel("Validation Loss")
-plt.legend()
-plt.grid()
-plt.tight_layout()
+    for activation_name, r in activation_results.items():
+        line = (
+            f"\nActivation = {activation_name}\n"
+            f"Final Training Loss:       {r['final_train_loss']:.4f}\n"
+            f"Final Validation Loss:     {r['final_val_loss']:.4f}\n"
+            f"Final Training Accuracy:   {r['final_train_accuracy']:.4f}\n"
+            f"Final Validation Accuracy: {r['final_val_accuracy']:.4f}\n"
+            f"Best Validation Loss:      {r['best_val_loss']:.4f}\n"
+            f"Best Validation Loss Epoch:{r['best_val_loss_epoch']}\n"
+            f"Final Loss Gap:            {r['final_loss_gap']:.4f}\n"
+            f"Hidden Gradient Norm:      {r['gradient_norm']:.6f}\n"
+        )
 
-comparison_path = task9_results_dir / "activation_validation_loss_comparison.png"
+        print(line)
+        f.write(line)
 
-plt.savefig(comparison_path, dpi=300, bbox_inches="tight")
-plt.show()
-plt.close()
-
-print(f"Saved: {comparison_path}")
-
-
-# Plot gradient norm comparison.
-plt.figure(figsize=(7, 5))
-
-plt.bar(
-    activation_results.keys(),
-    [r["gradient_norm"] for r in activation_results.values()]
-)
-
-plt.title("Hidden Gradient Norm Comparison")
-plt.xlabel("Activation Function")
-plt.ylabel("Gradient Norm")
-plt.grid(axis="y")
-plt.tight_layout()
-
-gradient_path = task9_results_dir / "activation_gradient_norm_comparison.png"
-
-plt.savefig(gradient_path, dpi=300, bbox_inches="tight")
-plt.show()
-plt.close()
-
+print(f"Results saved to: {results_file}")
 ```
 
 ---
 
 ## 3. Results
 
-| Activation | Final Train Loss | Final Val Loss | Final Train Acc | Final Val Acc | Best Val Loss | Best Epoch | Final Loss Gap | Hidden Gradient Norm |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| ReLU | 0.0089 | 0.1296 | 99.73% | 97.36% | 0.0979 | 5 | 0.1207 | 0.277891 |
-| Tanh | 0.0074 | 0.1157 | 99.89% | 97.48% | 0.0953 | 7 | 0.1083 | 0.373865 |
-| Softsign | 0.0112 | 0.0994 | 99.88% | 97.46% | 0.0890 | 11 | 0.0882 | 0.246544 |
-| GELU | 0.0072 | 0.1386 | 99.81% | 97.54% | 0.0964 | 4 | 0.1314 | 0.200162 |
+| Activation | Best Validation Loss | Best Epoch | Final Validation Loss | Final Validation Accuracy | Final Loss Gap | Hidden Gradient Norm |
+|---|---:|---:|---:|---:|---:|---:|
+| ReLU | 0.0979 | 5 | 0.1296 | 0.9736 | 0.1207 | 0.277891 |
+| Tanh | 0.0953 | 7 | 0.1157 | 0.9748 | 0.1083 | 0.373865 |
+| Softsign | 0.0890 | 11 | 0.0994 | 0.9746 | 0.0882 | 0.246544 |
+| GELU | 0.0964 | 4 | 0.1386 | 0.9754 | 0.1314 | 0.200162 |
 
 ---
 
@@ -253,19 +219,7 @@ plt.close()
 
 ---
 
-## 5. Validation Loss Comparison
-
-![Validation Loss Comparison](../results/activation_tests/task09_activations/activation_validation_loss_comparison.png)
-
----
-
-## 6. Hidden Gradient Norm Comparison
-
-![Hidden Gradient Norm Comparison](../results/activation_tests/task09_activations/activation_gradient_norm_comparison.png)
-
----
-
-## 7. Short Analysis
+## 5. Short Analysis
 
 ### ReLU
 
@@ -281,7 +235,7 @@ Final Validation Loss = 0.1296
 Hidden Gradient Norm = 0.277891
 ```
 
-After the best epoch, training loss continued decreasing while validation loss increased. This indicates overfitting.
+After the best epoch, training loss continued decreasing while validation loss increased. This indicates **overfitting**.
 
 ReLU remains preferred in many MLP and CNN models because it is computationally cheap, easy to optimize, and works well in deep networks.
 
@@ -359,7 +313,7 @@ GELU performed well early, but validation loss increased after the best epoch.
 
 ---
 
-## 8. Gradient Flow and Vanishing Gradients
+## 6. Gradient Flow and Vanishing Gradients
 
 | Activation | Gradient Behavior | Vanishing Gradient Risk |
 |---|---|---|
@@ -376,7 +330,7 @@ GELU also supports smoother gradient flow, but in this experiment it still overf
 
 ---
 
-## 9. Why GELU Performs Well in Transformer Architectures
+## 7. Why GELU Performs Well in Transformer Architectures
 
 GELU is commonly used in Transformer architectures because it provides smooth, probabilistic-like gating.
 
@@ -398,7 +352,7 @@ In this experiment, GELU achieved high validation accuracy, but it did not achie
 
 ---
 
-## 10. Why ReLU Remains Preferred in Many MLP and CNN Models
+## 8. Why ReLU Remains Preferred in Many MLP and CNN Models
 
 ReLU remains widely used because it is simple, fast, and effective.
 
@@ -417,7 +371,7 @@ Although GELU can perform very well in modern architectures such as Transformers
 
 ---
 
-## 11. Key Takeaway
+## 9. Key Takeaway
 
 Softsign achieved the best validation loss in this experiment:
 
