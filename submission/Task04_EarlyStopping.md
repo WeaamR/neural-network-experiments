@@ -11,7 +11,6 @@ def create_model(optimizer_name, seed=42):
     """
     Create the same model architecture for each experiment.
     """
-
     # Use the same initial weights for a fair comparison.
     keras.utils.set_random_seed(seed)
 
@@ -23,158 +22,60 @@ def create_model(optimizer_name, seed=42):
     ])
 
     if optimizer_name == "adam":
-        optimizer = keras.optimizers.Adam(
-            learning_rate=0.001
-        )
-
+        optimizer = keras.optimizers.Adam(learning_rate=0.001)
     elif optimizer_name == "sgd":
-        optimizer = keras.optimizers.SGD(
-            learning_rate=0.01
-        )
-
+        optimizer = keras.optimizers.SGD(learning_rate=0.01)
     else:
-        raise ValueError(
-            "optimizer_name must be 'adam' or 'sgd'."
-        )
+        raise ValueError("optimizer_name must be 'adam' or 'sgd'.")
 
     model.compile(
         optimizer=optimizer,
         loss="sparse_categorical_crossentropy",
         metrics=["accuracy"]
     )
-
     return model
 
 
-def plot_learning_curves(
-    history,
-    experiment_name,
-    experiment_title,
-    best_epoch
-):
+def plot_learning_curves(history, experiment_name, experiment_title, best_epoch):
     """
     Plot and save loss and accuracy curves.
     """
+    epoch_numbers = range(1, len(history.history["loss"]) + 1)
 
-    epoch_numbers = range(
-        1,
-        len(history.history["loss"]) + 1
-    )
-
-    # Plot loss curves.
-    fig = plt.figure(figsize=(7, 5))
-
-    plt.plot(
-        epoch_numbers,
-        history.history["loss"],
-        label="Training Loss"
-    )
-
-    plt.plot(
-        epoch_numbers,
-        history.history["val_loss"],
-        label="Validation Loss"
-    )
-
-    plt.axvline(
-        best_epoch,
-        linestyle="--",
-        label=f"Best Epoch: {best_epoch}"
-    )
-
-    plt.title(f"Loss Curves — {experiment_title}")
-    plt.xlabel("Epoch")
-    plt.ylabel("Loss")
-    plt.legend()
-    plt.grid()
-    plt.tight_layout()
-
-    fig.savefig(
-        task4_results_dir
-        / f"task04_{experiment_name}_loss.png",
-        dpi=300,
-        bbox_inches="tight"
-    )
-
-    plt.show()
-    plt.close(fig)
-
-    # Plot accuracy curves.
-    fig = plt.figure(figsize=(7, 5))
-
-    plt.plot(
-        epoch_numbers,
-        history.history["accuracy"],
-        label="Training Accuracy"
-    )
-
-    plt.plot(
-        epoch_numbers,
-        history.history["val_accuracy"],
-        label="Validation Accuracy"
-    )
-
-    plt.axvline(
-        best_epoch,
-        linestyle="--",
-        label=f"Best Epoch: {best_epoch}"
-    )
-
-    plt.title(f"Accuracy Curves — {experiment_title}")
-    plt.xlabel("Epoch")
-    plt.ylabel("Accuracy")
-    plt.legend()
-    plt.grid()
-    plt.tight_layout()
-
-    fig.savefig(
-        task4_results_dir
-        / f"task04_{experiment_name}_accuracy.png",
-        dpi=300,
-        bbox_inches="tight"
-    )
-
-    plt.show()
-    plt.close(fig)
+    for metric in ["loss", "accuracy"]:
+        fig = plt.figure(figsize=(7, 5))
+        plt.plot(epoch_numbers, history.history[metric],           label=f"Training {metric.capitalize()}")
+        plt.plot(epoch_numbers, history.history[f"val_{metric}"],  label=f"Validation {metric.capitalize()}")
+        plt.axvline(best_epoch, linestyle="--",                    label=f"Best Epoch: {best_epoch}")
+        plt.title(f"{metric.capitalize()} Curves — {experiment_title}")
+        plt.xlabel("Epoch")
+        plt.ylabel(metric.capitalize())
+        plt.legend()
+        plt.grid()
+        plt.tight_layout()
+        fig.savefig(
+            task4_results_dir / f"task04_{experiment_name}_{metric}.png",
+            dpi=300,
+            bbox_inches="tight"
+        )
+        plt.show()
+        plt.close(fig)
 
 
 # Define the EarlyStopping experiments.
 experiments = [
-    {
-        "name": "adam_patience_3",
-        "title": "Adam — Patience 3",
-        "optimizer": "adam",
-        "patience": 3,
-        "max_epochs": 30
-    },
-    {
-        "name": "adam_patience_5",
-        "title": "Adam — Patience 5",
-        "optimizer": "adam",
-        "patience": 5,
-        "max_epochs": 30
-    },
-    {
-        "name": "sgd_patience_3",
-        "title": "SGD — Patience 3",
-        "optimizer": "sgd",
-        "patience": 3,
-        "max_epochs": 50
-    }
+    {"name": "adam_patience_3", "title": "Adam — Patience 3", "optimizer": "adam", "patience": 3, "max_epochs": 30},
+    {"name": "adam_patience_5", "title": "Adam — Patience 5", "optimizer": "adam", "patience": 5, "max_epochs": 30},
+    {"name": "sgd_patience_3",  "title": "SGD — Patience 3",  "optimizer": "sgd",  "patience": 3, "max_epochs": 50}
 ]
-
 
 # Store the results of all experiments.
 experiment_results = []
 
-
 for experiment in experiments:
 
     # Create a new model for each experiment.
-    model = create_model(
-        optimizer_name=experiment["optimizer"],
-        seed=42
-    )
+    model = create_model(optimizer_name=experiment["optimizer"], seed=42)
 
     # Create the EarlyStopping callback.
     early_stopping = keras.callbacks.EarlyStopping(
@@ -186,8 +87,7 @@ for experiment in experiments:
 
     # Train the model.
     history = model.fit(
-        x_train,
-        y_train,
+        x_train, y_train,
         epochs=experiment["max_epochs"],
         batch_size=32,
         validation_data=(x_val, y_val),
@@ -196,46 +96,24 @@ for experiment in experiments:
     )
 
     # Find the actual number of completed epochs.
-    stopped_epoch = len(
-        history.history["loss"]
-    )
+    stopped_epoch = len(history.history["loss"])
 
     # Find the epoch with the lowest validation loss.
-    best_epoch = (
-        np.argmin(history.history["val_loss"]) + 1
-    )
+    best_epoch          = np.argmin(history.history["val_loss"]) + 1
+    best_validation_loss = np.min(history.history["val_loss"])
 
-    best_validation_loss = np.min(
-        history.history["val_loss"]
-    )
-
-    final_training_loss = history.history["loss"][-1]
-    final_validation_loss = history.history["val_loss"][-1]
-
-    final_training_accuracy = (
-        history.history["accuracy"][-1]
-    )
-
-    final_validation_accuracy = (
-        history.history["val_accuracy"][-1]
-    )
+    final_training_loss      = history.history["loss"][-1]
+    final_validation_loss    = history.history["val_loss"][-1]
+    final_training_accuracy  = history.history["accuracy"][-1]
+    final_validation_accuracy = history.history["val_accuracy"][-1]
 
     # Check whether EarlyStopping stopped the training.
-    early_stopping_triggered = (
-        stopped_epoch < experiment["max_epochs"]
-    )
+    early_stopping_triggered = stopped_epoch < experiment["max_epochs"]
 
     print(f"\n{experiment['title']}")
-    print(f"Best epoch: {best_epoch}")
-    print(f"Stopped epoch: {stopped_epoch}")
-    print(
-        f"Best validation loss: "
-        f"{best_validation_loss:.4f}"
-    )
-    print(
-        "EarlyStopping triggered:",
-        early_stopping_triggered
-    )
+    print(f"Best epoch: {best_epoch} | Stopped epoch: {stopped_epoch}")
+    print(f"Best validation loss: {best_validation_loss:.4f}")
+    print(f"EarlyStopping triggered: {early_stopping_triggered}")
 
     # Save the learning curves.
     plot_learning_curves(
@@ -247,17 +125,17 @@ for experiment in experiments:
 
     # Store the experiment results.
     experiment_results.append({
-        "title": experiment["title"],
-        "optimizer": experiment["optimizer"],
-        "patience": experiment["patience"],
-        "max_epochs": experiment["max_epochs"],
-        "stopped_epoch": stopped_epoch,
-        "best_epoch": best_epoch,
-        "best_validation_loss": best_validation_loss,
-        "final_training_loss": final_training_loss,
-        "final_validation_loss": final_validation_loss,
-        "final_training_accuracy": final_training_accuracy,
-        "final_validation_accuracy": final_validation_accuracy,
+        "title":                    experiment["title"],
+        "optimizer":                experiment["optimizer"],
+        "patience":                 experiment["patience"],
+        "max_epochs":               experiment["max_epochs"],
+        "stopped_epoch":            stopped_epoch,
+        "best_epoch":               best_epoch,
+        "best_validation_loss":     best_validation_loss,
+        "final_training_loss":      final_training_loss,
+        "final_validation_loss":    final_validation_loss,
+        "final_training_accuracy":  final_training_accuracy,
+        "final_validation_accuracy":final_validation_accuracy,
         "early_stopping_triggered": early_stopping_triggered
     })
 ```
