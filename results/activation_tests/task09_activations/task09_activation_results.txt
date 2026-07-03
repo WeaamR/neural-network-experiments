@@ -1,0 +1,42 @@
+Task 09 — Activation Function Comparison
+==================================================
+
+Activation = ReLU
+Final Training Loss:       0.0089
+Final Validation Loss:     0.1296
+Final Training Accuracy:   0.9973
+Final Validation Accuracy: 0.9736
+Best Validation Loss:      0.0979
+Best Validation Loss Epoch:5
+Final Loss Gap:            0.1207
+Hidden Gradient Norm:      0.277891
+
+Activation = Tanh
+Final Training Loss:       0.0074
+Final Validation Loss:     0.1157
+Final Training Accuracy:   0.9989
+Final Validation Accuracy: 0.9748
+Best Validation Loss:      0.0953
+Best Validation Loss Epoch:7
+Final Loss Gap:            0.1083
+Hidden Gradient Norm:      0.373865
+
+Activation = Softsign
+Final Training Loss:       0.0112
+Final Validation Loss:     0.0994
+Final Training Accuracy:   0.9988
+Final Validation Accuracy: 0.9746
+Best Validation Loss:      0.0890
+Best Validation Loss Epoch:11
+Final Loss Gap:            0.0882
+Hidden Gradient Norm:      0.246544
+
+Activation = GELU
+Final Training Loss:       0.0072
+Final Validation Loss:     0.1386
+Final Training Accuracy:   0.9981
+Final Validation Accuracy: 0.9754
+Best Validation Loss:      0.0964
+Best Validation Loss Epoch:4
+Final Loss Gap:            0.1314
+Hidden Gradient Norm:      0.200162
