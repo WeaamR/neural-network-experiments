@@ -187,111 +187,156 @@ The small time differences may be influenced by the Colab runtime and should not
 
 ### SGD
 
-![SGD Loss Curves](../results/optimizer_tests/task07_optimizers/sgd_loss.png)
+<table>
+  <tr>
+    <th>Loss Curves</th>
+    <th>Accuracy Curves</th>
+  </tr>
+  <tr>
+    <td>
+      <img src="../results/optimizer_tests/task07_optimizers/sgd_loss.png" width="450">
+    </td>
+    <td>
+      <img src="../results/optimizer_tests/task07_optimizers/sgd_accuracy.png" width="450">
+    </td>
+  </tr>
+</table>
 
-![SGD Accuracy Curves](../results/optimizer_tests/task07_optimizers/sgd_accuracy.png)
+---
 
 ### SGD with Momentum
 
-![SGD Momentum Loss Curves](../results/optimizer_tests/task07_optimizers/sgd-momentum_loss.png)
+<table>
+  <tr>
+    <th>Loss Curves</th>
+    <th>Accuracy Curves</th>
+  </tr>
+  <tr>
+    <td>
+      <img src="../results/optimizer_tests/task07_optimizers/sgd-momentum_loss.png" width="450">
+    </td>
+    <td>
+      <img src="../results/optimizer_tests/task07_optimizers/sgd-momentum_accuracy.png" width="450">
+    </td>
+  </tr>
+</table>
 
-![SGD Momentum Accuracy Curves](../results/optimizer_tests/task07_optimizers/sgd-momentum_accuracy.png)
+---
 
 ### Adam
 
-![Adam Loss Curves](../results/optimizer_tests/task07_optimizers/adam_loss.png)
+<table>
+  <tr>
+    <th>Loss Curves</th>
+    <th>Accuracy Curves</th>
+  </tr>
+  <tr>
+    <td>
+      <img src="../results/optimizer_tests/task07_optimizers/adam_loss.png" width="450">
+    </td>
+    <td>
+      <img src="../results/optimizer_tests/task07_optimizers/adam_accuracy.png" width="450">
+    </td>
+  </tr>
+</table>
 
-![Adam Accuracy Curves](../results/optimizer_tests/task07_optimizers/adam_accuracy.png)
+---
 
 ### AdamW
 
-![AdamW Loss Curves](../results/optimizer_tests/task07_optimizers/adamw_loss.png)
-
-![AdamW Accuracy Curves](../results/optimizer_tests/task07_optimizers/adamw_accuracy.png)
+<table>
+  <tr>
+    <th>Loss Curves</th>
+    <th>Accuracy Curves</th>
+  </tr>
+  <tr>
+    <td>
+      <img src="../results/optimizer_tests/task07_optimizers/adamw_loss.png" width="450">
+    </td>
+    <td>
+      <img src="../results/optimizer_tests/task07_optimizers/adamw_accuracy.png" width="450">
+    </td>
+  </tr>
+</table>
 
 ---
-
 ## 5. Short Analysis
 
-### SGD — Slow but Steady Convergence
+### SGD — Slow but Still Improving
 
-SGD showed the slowest convergence among the four optimizers.
+SGD had the slowest convergence among the four optimizers.
 
-Its training and validation losses decreased continuously throughout all `20` epochs. The best validation loss was reached at epoch `20`, indicating that the model was still improving when training ended.
+Its training and validation losses continued decreasing until the final epoch. The best validation loss was reached at Epoch `20`, which means the model was still improving when training stopped.
 
-The final validation accuracy was `96.94%`, which was the lowest among the tested optimizers. However, the curves did not show clear overfitting.
+SGD did not show clear overfitting, but it also had the lowest final validation accuracy: `96.94%`.
 
-The final validation loss was slightly lower than the training loss:
+This suggests that standard SGD may need more epochs or a learning-rate schedule to reach stronger performance.
+
+---
+
+### SGD with Momentum — Best Validation Performance
+
+SGD with Momentum improved much faster than standard SGD.
+
+It reached the convergence threshold at Epoch `9` and achieved the best validation loss at Epoch `10`.
+
+This optimizer achieved the strongest validation performance in this experiment:
 
 ```text
-0.1101 - 0.1245 = -0.0144
+Best Validation Loss: 0.0814
+Final Validation Loss: 0.0891
+Final Validation Accuracy: 97.44%
 ```
 
-This can occur because the training loss is averaged across batches while the weights are being updated. Validation loss is calculated after the epoch using the final updated weights.
+Momentum helped by preserving useful update directions across batches. This made optimization faster and reduced unnecessary oscillation compared with standard SGD.
 
-The results suggest that SGD may have benefited from additional epochs or a learning-rate schedule.
-
----
-
-### SGD with Momentum — Best Overall Validation Performance
-
-Adding Momentum significantly accelerated SGD.
-
-The optimizer reached the convergence threshold at epoch `9` and achieved its best validation loss of `0.0814` at epoch `10`.
-
-This was the lowest best validation loss among the four optimizers. It also achieved the highest final validation accuracy, `97.44%`.
-
-Momentum preserves useful update directions across batches. This helps the optimizer move faster when gradients repeatedly point in a similar direction and reduces unnecessary side-to-side oscillation.
-
-After approximately epoch `10`, training loss continued decreasing while validation loss gradually increased. This indicates that overfitting began after the model reached its best validation-loss performance.
-
-Its final five-epoch validation-loss standard deviation was only `0.000657`, the lowest of the four experiments. The late validation curve changed very little, although it showed a small upward trend.
+After the best epoch, training loss continued decreasing while validation loss slightly increased, indicating mild overfitting.
 
 ---
 
-### Adam — Fast Convergence but Strongest Overfitting
+### Adam — Fastest Convergence, Strongest Overfitting
 
-Adam converged very quickly and reached its best validation loss of `0.0986` at epoch `4`.
+Adam converged very quickly and reached its best validation loss at Epoch `4`.
 
-However, after the early epochs, training loss continued decreasing toward zero while validation loss increased to `0.1530`.
+However, after that point, training loss continued decreasing while validation loss increased to `0.1530`.
 
-The final loss gap was:
+The final loss gap was the largest among the four optimizers:
 
 ```text
 0.1530 - 0.0083 = 0.1447
 ```
 
-This was the largest final loss gap among the four optimizers and indicates strong overfitting.
+This indicates strong overfitting.
 
-Adam also had the highest final five-epoch validation-loss standard deviation, `0.009132`, showing the largest late-stage variation in validation loss.
-
-Adam was highly effective at minimizing training loss, but without EarlyStopping or stronger regularization, it continued fitting training-specific patterns after validation performance had stopped improving.
+Adam was very effective at minimizing training loss, but without EarlyStopping or stronger regularization, it continued fitting training-specific patterns after validation performance stopped improving.
 
 ---
 
-### AdamW — Fast Convergence with Reduced Late Overfitting
+### AdamW — Fast Convergence with Better Regularization than Adam
 
-AdamW also converged quickly, reaching the convergence threshold and its best validation loss at epoch `4`.
+AdamW also converged quickly and reached its best validation loss at Epoch `4`.
 
-Its best validation loss was `0.0985`, which was nearly identical to Adam's `0.0986`.
-
-AdamW applies weight decay separately from the adaptive gradient update. This is intended to control weight growth more consistently than applying a traditional L2 penalty inside Adam.
-
-The final loss gap was:
+Its best validation loss was almost identical to Adam:
 
 ```text
-0.1370 - 0.0091 = 0.1279
+Adam Best Val Loss:  0.0986
+AdamW Best Val Loss: 0.0985
 ```
 
-AdamW still showed overfitting because its training loss continued decreasing while validation loss increased after the early epochs.
+However, AdamW had a lower final validation loss than Adam:
 
-However, under these settings, AdamW produced a lower final validation loss, a higher final validation accuracy, and a lower late-stage validation-loss standard deviation than Adam. This suggests that weight decay reduced late overfitting to some extent, although it did not eliminate it.
+```text
+Adam Final Val Loss:  0.1530
+AdamW Final Val Loss: 0.1370
+```
+
+This suggests that AdamW's weight decay helped reduce late overfitting compared with Adam, although it did not eliminate overfitting completely.
 
 ---
 
-## 6. Convergence Speed Comparison
+## 6. Comparison Summary
 
-According to the convergence metric, the optimizers ranked as follows:
+### Convergence Speed
 
 | Rank | Optimizer | Convergence Epoch |
 |---:|---|---:|
@@ -300,17 +345,30 @@ According to the convergence metric, the optimizers ranked as follows:
 | 3 | SGD with Momentum | 9 |
 | 4 | SGD | 20 |
 
-Adam and AdamW converged fastest because they adapted the effective update size separately for each parameter.
+Adam and AdamW converged the fastest because they use adaptive per-parameter update sizes.
 
-SGD with Momentum was slower than the adaptive optimizers but substantially faster than standard SGD.
+SGD with Momentum was slower than Adam and AdamW, but much faster than standard SGD.
 
-Standard SGD required the full `20` epochs and was still improving at the end of training.
+Standard SGD was the slowest and was still improving at Epoch `20`.
 
 ---
 
-## 7. Stability Comparison
+### Validation Performance
 
-Using the standard deviation of the final five validation-loss values:
+| Rank | Optimizer | Best Validation Loss | Final Validation Accuracy |
+|---:|---|---:|---:|
+| 1 | SGD with Momentum | 0.0814 | 97.44% |
+| 2 | AdamW | 0.0985 | 97.36% |
+| 3 | Adam | 0.0986 | 97.14% |
+| 4 | SGD | 0.1101 | 96.94% |
+
+SGD with Momentum achieved the best validation performance overall.
+
+Adam and AdamW converged faster, but they did not achieve the best generalization.
+
+---
+
+### Stability
 
 | Optimizer | Final Five-Epoch Val-Loss STD |
 |---|---:|
@@ -319,117 +377,32 @@ Using the standard deviation of the final five validation-loss values:
 | SGD | 0.003842 |
 | Adam | 0.009132 |
 
-SGD with Momentum produced the least variable validation loss near the end.
+SGD with Momentum had the most stable validation loss near the end of training.
 
-Adam produced the largest late-stage variation.
+Adam had the largest late-stage variation, which matches its stronger overfitting behavior.
 
-However, this standard deviation should not be interpreted alone. For example, SGD's value is partly influenced by its validation loss still decreasing steadily rather than fluctuating around a fixed value.
-
----
-
-## 8. How Each Optimizer Navigates the Loss Landscape
-
-### SGD
-
-SGD updates the parameters using the current batch gradient:
-
-```text
-Current gradient
-→ One update direction
-→ Same global learning rate for all parameters
-```
-
-It follows the local slope directly and can therefore move slowly through flat regions or oscillate across narrow valleys.
-
-Its simplicity may sometimes help it reach solutions that generalize well, but it often requires careful learning-rate tuning and more epochs.
-
-### SGD with Momentum
-
-Momentum combines the current gradient with a moving accumulation of previous update directions.
-
-```text
-Current gradient
-+
-Previous direction
-=
-Smoothed update
-```
-
-It accelerates movement when gradients repeatedly point in the same direction and reduces side-to-side oscillation.
-
-This allowed it to converge much faster than standard SGD and achieve the best validation performance in this experiment.
-
-### Adam
-
-Adam maintains two moving estimates:
-
-- The average direction of the gradients.
-- The average squared magnitude of the gradients.
-
-It then assigns an adaptive update size to each parameter.
-
-Parameters with consistently large or unstable gradients receive relatively smaller updates, while parameters with smaller gradients may receive relatively larger updates.
-
-This allows Adam to move efficiently through loss landscapes containing:
-
-- Different gradient scales.
-- Flat regions.
-- Noisy gradients.
-- Narrow valleys.
-
-### AdamW
-
-AdamW uses Adam's adaptive updates but applies weight decay separately.
-
-```text
-Adaptive gradient update
-+
-Independent weight decay
-```
-
-This separation is intended to make regularization more predictable. However, the weight-decay coefficient must still be tuned appropriately.
-
-In this experiment, AdamW reduced late overfitting compared with Adam, but it did not prevent overfitting completely.
+However, this stability metric should not be interpreted alone. For example, SGD's validation loss was still decreasing, so its standard deviation does not necessarily mean it had already converged.
 
 ---
 
-## 9. Why Adam Often Outperforms Classical Optimizers
+## 7. Optimizer Behavior in the Loss Landscape
 
-Adam often performs well because it combines two useful ideas:
+SGD follows the current batch gradient directly using one global learning rate. This makes it simple but slower, especially in flat regions or narrow valleys.
 
-1. **Momentum-like gradient smoothing**
+SGD with Momentum adds a moving memory of previous update directions. This helps it move faster in consistent directions and reduces side-to-side oscillation.
 
-   Adam tracks a moving average of previous gradients, reducing the effect of noisy batch updates.
+Adam uses adaptive updates for each parameter based on gradient history. This explains its fast early convergence, but it can also overfit quickly if training continues after validation loss stops improving.
 
-2. **Adaptive per-parameter learning rates**
-
-   Each weight receives an update size based on its own gradient history rather than using the same effective step size for every parameter.
-
-This allows Adam to:
-
-- Converge quickly.
-- Require less manual learning-rate tuning.
-- Handle differently scaled gradients.
-- Perform well with noisy or sparse gradients.
-
-However, Adam does not always produce the best generalization.
-
-In this experiment, Adam converged faster than SGD with Momentum, but SGD with Momentum achieved a lower best validation loss, a lower final validation loss, and a higher final validation accuracy.
-
-Therefore, Adam's main advantage was optimization speed, while SGD with Momentum achieved the best validation performance.
+AdamW uses Adam's adaptive updates with separate weight decay. In this experiment, this helped reduce late overfitting compared with Adam.
 
 ---
 
-## 10. Key Takeaway
+## 8. Key Takeaway
 
-Standard SGD converged slowly but continued improving throughout all `20` epochs.
+Faster convergence did not guarantee better generalization.
 
-SGD with Momentum provided the best overall validation performance. It achieved the lowest best validation loss of `0.0814`, the lowest final validation loss of `0.0891`, and the highest final validation accuracy of `97.44%`.
+Adam and AdamW reached their best validation-loss region the fastest, but SGD with Momentum achieved the best overall validation performance.
 
-Adam and AdamW converged the fastest, reaching their best validation-loss region by epoch `4`.
+Standard SGD was the slowest and may need more epochs or learning-rate scheduling.
 
-Adam showed the strongest overfitting and the largest late-stage validation-loss variation.
-
-AdamW also overfit, but it performed better than Adam near the end of training under the selected weight-decay setting.
-
-The experiment demonstrates that faster optimization does not always produce better generalization. In this case, SGD with Momentum provided the best balance between convergence speed, stability, and validation performance.
+In this experiment, SGD with Momentum provided the best balance between convergence speed, stability, and validation performance.
