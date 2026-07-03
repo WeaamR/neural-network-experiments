@@ -75,7 +75,7 @@ def plot_curves(history, label, save_dir, file_prefix, metric):
 
 # Train all three batch-size configurations.
 batch_sizes      = [8, 32, 128]
-number_of_epochs = 20
+number_of_epochs = 30
 batch_histories  = {}
 batch_results    = {}
 
@@ -180,9 +180,9 @@ print(f"Results saved to: {results_file}")
 
 | Batch Size | Final Train Loss | Final Val Loss | Final Val Accuracy | Best Val Loss | Best Epoch | Steps per Epoch | Final 5-Epoch Val-Loss STD | Training Time |
 |-----------:|-----------------:|---------------:|-------------------:|--------------:|-----------:|----------------:|---------------------------:|--------------:|
-| `8`   | 0.0120 | 0.1608 | 97.60% | 0.0942 | 4  | 6875 | 0.018815 | 362.47 s |
-| `32`  | 0.0083 | 0.1304 | 97.52% | 0.0986 | 4  | 1719 | 0.001615 | 99.35 s |
-| `128` | 0.0228 | 0.1050 | 96.90% | 0.0905 | 10 | 430  | 0.003218 | 32.76 s |
+| `8`   | 0.0092 | 0.2248 | 97.44% | 0.0966 | 3  | 6875 | 0.012605 | 517.55 s |
+| `32`  | 0.0044 | 0.1575 | 97.48% | 0.0979 | 5  | 1719 | 0.010120 | 185.63 s |
+| `128` | 0.0085 | 0.1263 | 97.18% | 0.0905 | 10 | 430  | 0.003504 | 65.68 s |
 
 ### Validation Loss Comparison
 
@@ -190,7 +190,7 @@ print(f"Results saved to: {results_file}")
 
 ---
 
-## 3. Loss and Accuracy Curves
+## 4. Loss and Accuracy Curves
 
 ### Batch Size = 8
 
@@ -212,19 +212,19 @@ print(f"Results saved to: {results_file}")
 
 ---
 
-## 4. Short Analysis
+## 5. Short Analysis
 
 ### Batch Size = 8 — Many Updates and Early Overfitting
 
 Batch Size `8` performed `6875` parameter updates per epoch, which was the largest number among the three configurations.
 
-It reached its best validation loss of `0.0942` at epoch `4`. After that point, the training loss continued decreasing until it reached `0.0120`, while the validation loss increased substantially to `0.1608`.
+It reached its best validation loss of `0.0966` at epoch `3`. After that point, the training loss continued decreasing until it reached `0.0092`, while the validation loss increased substantially to `0.2248`.
 
-The validation-loss curve also showed a large fluctuation near epoch `18`. Its final five-epoch validation-loss standard deviation was `0.018815`, the highest among the three configurations.
+The validation-loss curve became increasingly irregular during the later epochs. Its final five-epoch validation-loss standard deviation was `0.012605`, the highest among the three configurations.
 
 **This indicates that the small batch produced less stable validation behavior and began overfitting early.**
 
-It also required the longest training time, `362.47` seconds, because the small batch caused a very large number of weight updates.
+It also required the longest training time, `517.55` seconds, because the small batch caused a very large number of weight updates.
 
 ---
 
@@ -232,11 +232,11 @@ It also required the longest training time, `362.47` seconds, because the small 
 
 Batch Size `32` performed `1719` updates per epoch.
 
-It reached its best validation loss of `0.0986` at epoch `4`. Its training loss continued decreasing after that point, while validation loss gradually increased to `0.1304`, indicating overfitting.
+It reached its best validation loss of `0.0979` at epoch `5`. Its training loss continued decreasing after that point, while validation loss gradually increased to `0.1575`, indicating overfitting.
 
 However, its validation-loss curve was considerably more stable than Batch Size `8`.
 
-The final five-epoch validation-loss standard deviation was only `0.001615`, the lowest among the tested configurations.
+The final five-epoch validation-loss standard deviation was `0.010120`, showing more late-stage variation than Batch Size `128` but less than Batch Size `8`.
 
 This configuration provided a practical balance between:
 
@@ -245,7 +245,7 @@ This configuration provided a practical balance between:
 - Validation accuracy.
 - Computational cost.
 
-Its total training time was `99.35` seconds, substantially lower than Batch Size `8`.
+Its total training time was `185.63` seconds, substantially lower than Batch Size `8`.
 
 ---
 
@@ -253,7 +253,7 @@ Its total training time was `99.35` seconds, substantially lower than Batch Size
 
 Batch Size `128` required only `430` updates per epoch.
 
-It completed training in `32.76` seconds, making it the fastest configuration by a large margin.
+It completed training in `65.68` seconds, making it the fastest configuration by a large margin.
 
 This model reached the lowest best validation loss among all three experiments:
 
@@ -265,16 +265,16 @@ Best Epoch = 10
 It also produced the smallest final train–validation loss gap:
 
 ```text
-0.1050 - 0.0228 = 0.0822
+0.1263 - 0.0085 = 0.1178
 ```
 
-However, its final validation accuracy was `96.90%`, which was slightly lower than the validation accuracies achieved with Batch Sizes `8` and `32`.
+However, its final validation accuracy was `97.18%`, which was slightly lower than the validation accuracies achieved with Batch Sizes `8` and `32`.
 
 Therefore, the larger batch achieved better validation loss and faster computation, but slightly lower classification accuracy.
 
 ---
 
-## 5. Why Smaller Batches Introduce Gradient Noise
+## 6. Why Smaller Batches Introduce Gradient Noise
 
 The gradient used in each weight update is estimated from the samples in the current batch.
 
@@ -297,9 +297,11 @@ Small batch → Noisier gradient estimate
 Large batch → More stable gradient estimate
 ```
 
+Gradient noise was not measured directly in this experiment. The loss curves were used to compare the overall training and validation behavior.
+
 ---
 
-## 6. When Gradient Noise Can Be Beneficial
+## 7. When Gradient Noise Can Be Beneficial
 
 Gradient noise is not always harmful.
 
@@ -316,11 +318,11 @@ This exploration may help the model reach flatter solutions that are less sensit
 
 However, excessive noise can also make training unstable. Therefore, a small batch does not automatically guarantee better generalization.
 
-In this experiment, Batch Size `8` achieved the highest final validation accuracy, but it also showed the strongest late-stage increase and fluctuation in validation loss.
+In this experiment, Batch Size `32` achieved the highest final validation accuracy, while Batch Size `8` showed the strongest late-stage increase and fluctuation in validation loss.
 
 ---
 
-## 7. Why Larger Batches Can Train Faster
+## 8. Why Larger Batches Can Train Faster
 
 A larger batch processes more samples in each update and requires fewer updates to complete one epoch.
 
@@ -339,97 +341,69 @@ Larger batches can also use GPU parallel processing more efficiently, which redu
 The measured training times clearly demonstrated this:
 
 ```text
-Batch Size = 8   → 362.47 seconds
-Batch Size = 32  → 99.35 seconds
-Batch Size = 128 → 32.76 seconds
+Batch Size = 8   → 517.55 seconds
+Batch Size = 32  → 185.63 seconds
+Batch Size = 128 → 65.68 seconds
 ```
 
-However, faster wall-clock training does not necessarily mean that the model reaches its best validation result in fewer epochs.
-
-Batch Size `128` was fastest in time, but its best validation loss occurred at epoch `10`, compared with epoch `4` for the smaller batches.
+**However, faster wall-clock training does not necessarily mean that the model reaches its best validation result in fewer epochs.**
+Batch Size `128` was fastest in time, but its best validation loss occurred at epoch `10`, compared with epochs `3` and `5` for Batch Sizes `8` and `32`.
 
 ---
 
-## 8. Why Larger Batches May Generalize Worse
+## 9. Why Larger Batches May Generalize Worse
 
-A large batch produces a more accurate and stable gradient estimate.
+A large batch produces a more accurate and stable gradient estimate. This stability allows the optimizer to move directly toward a minimum, but it may reduce exploration of alternative regions in the loss landscape.
 
-This stability allows the optimizer to move directly toward a minimum, but it may reduce exploration of alternative regions in the loss landscape.
-
-In some cases, this can lead the model toward a sharp minimum that performs well on training data but is more sensitive to unseen data.
-
-Small-batch noise can act as a form of implicit regularization by preventing the model from following an overly precise optimization path.
+In some cases, this can **lead the model toward a sharp minimum** that performs well on training data but is more sensitive to unseen data. Small-batch noise can act as a form of **implicit regularization** by preventing the model from following an overly precise optimization path.
 
 However, this behavior is not guaranteed.
 
-In this experiment, Batch Size `128` achieved the best validation loss and the smallest final loss gap, but its validation accuracy was slightly lower than the smaller-batch configurations.
+However, larger batches do not always generalize worse. In this experiment, Batch Size 128 achieved the lowest best and final validation losses, although its final validation accuracy was slightly lower than that of the smaller-batch configurations.
 
-Therefore, the claim that larger batches always generalize worse was not fully supported by these results. The conclusion depended on whether generalization was measured using validation loss or validation accuracy.
+Therefore, the results did not clearly support the claim that larger batches always produce worse generalization. The outcome depended partly on whether generalization was evaluated using validation loss or validation accuracy.
 
 ---
 
-## 9. Effect of Batch Size on Loss-Curve Smoothness
+## 10. Effect of Batch Size on Loss-Curve Smoothness
 
 The validation-loss curves showed different levels of smoothness.
 
 ### Batch Size = 8
 
-The curve was the most irregular during later epochs and contained a large spike near epoch `18`.
-
-Its final five-epoch validation-loss standard deviation was:
+The curve was the most irregular during the later epochs and showed the strongest overall upward trend. Its final five-epoch validation-loss standard deviation was:
 
 ```text
-0.018815
+0.012605
 ```
 
 ### Batch Size = 32
 
-The validation-loss curve changed more gradually and had the lowest late-stage variability:
+The validation-loss curve was less irregular than Batch Size `8`, but it still showed noticeable late-stage variation:
 
 ```text
-0.001615
+0.010120
 ```
 
 ### Batch Size = 128
 
-The curve was also relatively smooth, although its late-stage variability was slightly greater than Batch Size `32`:
+The curve was the smoothest during the final epochs and had the lowest late-stage variability:
 
 ```text
-0.003218
+0.003504
 ```
 
-Therefore, the results showed that Batch Size `32` produced the smoothest validation-loss trend, while Batch Size `8` produced the least stable trend.
-
+Therefore, the results showed that Batch Size `128` produced the smoothest late-stage validation-loss trend, while Batch Size `8` produced the least stable trend.
 Loss-curve smoothness is influenced not only by batch size, but also by the optimizer, learning rate, data order, and the stage of training.
-
----
-
-## 10. Important Experimental Consideration
-
-Using the same number of epochs does not give every batch size the same number of parameter updates.
-
-Over 20 epochs:
-
-```text
-Batch Size = 8   → 137500 updates
-Batch Size = 32  → 34380 updates
-Batch Size = 128 → 8600 updates
-```
-
-Therefore, Batch Size `8` received approximately sixteen times more updates than Batch Size `128`.
-
-This large difference helps explain why the smaller batch fitted the training set more aggressively and began overfitting earlier.
-
-A stricter comparison could control the total number of optimizer updates rather than only controlling the number of epochs.
 
 ---
 
 ## 11. Key Takeaway
 
-Batch Size `8` produced the largest number of weight updates, the longest training time, and the most irregular validation-loss behavior. It achieved the highest final validation accuracy but also showed strong late-stage overfitting.
+**Batch Size `8`** produced the largest number of weight updates, the longest training time, and the most irregular validation-loss behavior. It also showed the strongest late-stage overfitting.
 
-Batch Size `32` provided the most balanced behavior and the smoothest late-stage validation-loss curve.
+**Batch Size `32`** achieved the highest final validation accuracy, but its validation loss still increased after the early epochs.
 
-Batch Size `128` was the fastest configuration and achieved the lowest best validation loss, but its validation accuracy was slightly lower.
+**Batch Size `128`** was the fastest and most stable configuration and achieved the lowest best and final validation losses, although its validation accuracy was slightly lower.
 
 The experiment demonstrates that batch size creates a tradeoff between gradient noise, computational speed, optimization stability, and generalization. No single batch size is always best; the most suitable choice depends on the model, optimizer, dataset, and evaluation metric.
