@@ -222,9 +222,7 @@ It reached its best validation loss of `0.0942` at epoch `4`. After that point, 
 
 The validation-loss curve also showed a large fluctuation near epoch `18`. Its final five-epoch validation-loss standard deviation was `0.018815`, the highest among the three configurations.
 
-This indicates that the small batch produced less stable validation behavior and began overfitting early.
-
-However, it achieved the highest final validation accuracy of `97.60%`. The combination of increasing validation loss and stable accuracy suggests that the model may have become more confident in some incorrect predictions, causing Cross-Entropy Loss to increase even when the number of correct predictions remained high.
+**This indicates that the small batch produced less stable validation behavior and began overfitting early.**
 
 It also required the longest training time, `362.47` seconds, because the small batch caused a very large number of weight updates.
 
@@ -263,8 +261,6 @@ This model reached the lowest best validation loss among all three experiments:
 Best Validation Loss = 0.0905
 Best Epoch = 10
 ```
-
-Its validation loss improved for more epochs than the smaller batches before beginning to increase.
 
 It also produced the smallest final train–validation loss gap:
 
