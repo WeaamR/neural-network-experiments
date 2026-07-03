@@ -99,32 +99,6 @@ for l2_value in l2_values:
     plt.show()
     plt.close()
     print(f"Saved: {output_path}")
-
-
-# Print and save the final results.
-results_file = task6_results_dir / "task06_l2_results.txt"
-
-with open(results_file, "w", encoding="utf-8") as f:
-    f.write("Task 06 — L2 Regularization Experiment\n")
-    f.write("=" * 45 + "\n")
-
-    for l2_value, r in l2_results.items():
-        line = (
-            f"\nL2 = {l2_value}\n"
-            f"Final Training Loss:         {r['final_train_loss']:.4f}\n"
-            f"Final Validation Loss:       {r['final_val_loss']:.4f}\n"
-            f"Final Training Accuracy:     {r['final_train_accuracy']:.4f}\n"
-            f"Final Validation Accuracy:   {r['final_val_accuracy']:.4f}\n"
-            f"Best Validation Loss:        {r['best_val_loss']:.4f}\n"
-            f"Best Epoch:                  {r['best_epoch']}\n"
-            f"Final Loss Gap:              {r['final_loss_gap']:.4f}\n"
-            f"Hidden-Layer Weight L2 Norm: {r['weight_l2_norm']:.4f}\n"
-        )
-        print(line)
-        f.write(line)
-
-print(f"Results saved to: {results_file}")
-
 ```
 
 ## 3. Results
