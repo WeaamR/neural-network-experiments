@@ -13,17 +13,87 @@ The training and validation losses were compared to determine how Dropout influe
 ## 2. Code Used
 
 ```python
+# Create a directory for Task 05 results.
+task5_results_dir = Path("results/loss_curves/task05_dropout")
+task5_results_dir.mkdir(parents=True, exist_ok=True)
+
+# Create a new model for each Dropout experiment.
+def create_dropout_model(dropout_rate, seed=42):
+    # Use the same initial weights for a fair comparison.
+    keras.utils.set_random_seed(seed)
+
+    model = keras.Sequential([
+        # Define the expected input shape.
+        keras.layers.Input(shape=(28, 28)),
+        # Convert each image into 784 pixel values.
+        keras.layers.Flatten(),
+        # Hidden layer that learns non-linear patterns.
+        keras.layers.Dense(64, activation="relu"),
+        # Randomly disable neurons during training.
+        keras.layers.Dropout(dropout_rate, seed=seed),
+        # Output one probability for each digit.
+        keras.layers.Dense(10, activation="softmax")
+    ])
+
+    # Configure the model for training.
+    model.compile(
+        optimizer=keras.optimizers.Adam(learning_rate=0.001),
+        loss="sparse_categorical_crossentropy",
+        metrics=["accuracy"]
+    )
+    return model
+
+# Plot and save loss and accuracy curves.
+def plot_dropout_curves(history, dropout_rate):
+    rate_name = str(dropout_rate).replace(".", "_")
+    epochs = range(1, len(history.history["loss"]) + 1)
+
+    # Plot training loss and validation loss.
+    plt.figure(figsize=(7, 5))
+    plt.plot(epochs, history.history["loss"], label="Training Loss")
+    plt.plot(epochs, history.history["val_loss"], label="Validation Loss")
+    plt.title(f"Loss Curves — Dropout = {dropout_rate}")
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.legend()
+    plt.grid()
+    plt.tight_layout()
+    plt.savefig(
+        task5_results_dir / f"task05_dropout_{rate_name}_loss.png",
+        dpi=300,
+        bbox_inches="tight"
+    )
+    plt.show()
+    plt.close()
+
+    # Plot training accuracy and validation accuracy.
+    plt.figure(figsize=(7, 5))
+    plt.plot(epochs, history.history["accuracy"], label="Training Accuracy")
+    plt.plot(epochs, history.history["val_accuracy"], label="Validation Accuracy")
+    plt.title(f"Accuracy Curves — Dropout = {dropout_rate}")
+    plt.xlabel("Epoch")
+    plt.ylabel("Accuracy")
+    plt.legend()
+    plt.grid()
+    plt.tight_layout()
+    plt.savefig(
+        task5_results_dir / f"task05_dropout_{rate_name}_accuracy.png",
+        dpi=300,
+        bbox_inches="tight"
+    )
+    plt.show()
+    plt.close()
+
 # Define the Dropout configurations.
 dropout_rates = [0.0, 0.1, 0.3]
+
+# Store the histories and results.
 dropout_histories = {}
+dropout_results = []
 
 for dropout_rate in dropout_rates:
-
-    # Create a new model for each experiment.
-    dropout_model = create_dropout_model(
-        dropout_rate=dropout_rate,
-        seed=42
-    )
+    # Create a fresh model for each experiment.
+    dropout_model = create_dropout_model(dropout_rate, seed=42)
 
     # Train every model using the same settings.
     history = dropout_model.fit(
@@ -38,69 +108,179 @@ for dropout_rate in dropout_rates:
     # Store the training history.
     dropout_histories[dropout_rate] = history
 
-    # Plot and save training loss versus validation loss.
-    plot_dropout_loss(
-        history,
-        dropout_rate
-    )
+    # Get the final metrics.
+    final_train_loss = history.history["loss"][-1]
+    final_val_loss = history.history["val_loss"][-1]
+    final_train_accuracy = history.history["accuracy"][-1]
+    final_val_accuracy = history.history["val_accuracy"][-1]
+
+    # Calculate the training-validation gaps.
+    loss_gap = final_val_loss - final_train_loss
+    accuracy_gap = final_train_accuracy - final_val_accuracy
+
+    # Find the lowest validation loss and its epoch.
+    best_val_loss = np.min(history.history["val_loss"])
+    best_epoch = np.argmin(history.history["val_loss"]) + 1
+
+    print(f"\nDropout Rate: {dropout_rate}")
+    print(f"Final Training Loss: {final_train_loss:.4f}")
+    print(f"Final Validation Loss: {final_val_loss:.4f}")
+    print(f"Final Training Accuracy: {final_train_accuracy:.4f}")
+    print(f"Final Validation Accuracy: {final_val_accuracy:.4f}")
+    print(f"Loss Gap: {loss_gap:.4f}")
+    print(f"Accuracy Gap: {accuracy_gap:.4f}")
+    print(f"Best Validation Loss: {best_val_loss:.4f}")
+    print(f"Best Epoch: {best_epoch}")
+
+    # Plot and save loss and accuracy curves.
+    plot_dropout_curves(history, dropout_rate)
 ```
 
 ## 3. Results
 
-| Configuration | Final Train Loss | Final Val Loss | Train Accuracy | Val Accuracy | Best Val Loss | Best Epoch |
-| ------------- | ---------------: | -------------: | -------------: | -----------: | ------------: | ---------: |
-| No Dropout    |           0.0089 |         0.1296 |         0.9973 |       0.9736 |        0.0979 |          5 |
-| Dropout = 0.1 |           0.0344 |         0.1007 |         0.9879 |       0.9750 |        0.0858 |          8 |
-| Dropout = 0.3 |           0.0888 |         0.0944 |         0.9709 |       0.9746 |        0.0853 |         12 |
+| Configuration | Final Train Loss | Final Val Loss | Loss Gap | Train Accuracy | Val Accuracy | Best Val Loss | Best Epoch |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| No Dropout | 0.0089 | 0.1296 | 0.1207 | 0.9973 | 0.9736 | 0.0979 | 5 |
+| Dropout = 0.1 | 0.0337 | 0.0949 | 0.0613 | 0.9886 | 0.9792 | 0.0750 | 7 |
+| Dropout = 0.3 | 0.0886 | 0.0748 | -0.0138 | 0.9706 | 0.9796 | 0.0748 | 20 |
+
+---
+
+## 4. Learning Curves
 
 ### No Dropout
 
-![No Dropout Loss Curve](../results/loss_curves/task05_dropout/task05_dropout_0_0_loss.png)
+<table>
+  <tr>
+    <th>Loss Curves</th>
+    <th>Accuracy Curves</th>
+  </tr>
+  <tr>
+    <td>
+      <img src="../results/loss_curves/task05_dropout/task05_dropout_0_0_loss.png" width="450">
+    </td>
+    <td>
+      <img src="../results/loss_curves/task05_dropout/task05_dropout_0_0_accuracy.png" width="450">
+    </td>
+  </tr>
+</table>
+
+---
 
 ### Dropout = 0.1
 
-![Dropout 0.1 Loss Curve](../results/loss_curves/task05_dropout/task05_dropout_0_1_loss.png)
+<table>
+  <tr>
+    <th>Loss Curves</th>
+    <th>Accuracy Curves</th>
+  </tr>
+  <tr>
+    <td>
+      <img src="../results/loss_curves/task05_dropout/task05_dropout_0_1_loss.png" width="450">
+    </td>
+    <td>
+      <img src="../results/loss_curves/task05_dropout/task05_dropout_0_1_accuracy.png" width="450">
+    </td>
+  </tr>
+</table>
+
+---
 
 ### Dropout = 0.3
 
-![Dropout 0.3 Loss Curve](../results/loss_curves/task05_dropout/task05_dropout_0_3_loss.png)
+<table>
+  <tr>
+    <th>Loss Curves</th>
+    <th>Accuracy Curves</th>
+  </tr>
+  <tr>
+    <td>
+      <img src="../results/loss_curves/task05_dropout/task05_dropout_0_3_loss.png" width="450">
+    </td>
+    <td>
+      <img src="../results/loss_curves/task05_dropout/task05_dropout_0_3_accuracy.png" width="450">
+    </td>
+  </tr>
+</table>
 
-## 4. Short Analysis
+---
 
-### No Dropout — clear overfitting:
+## 5. Short Analysis
 
-The loss gap is by far the widest at 0.1207, and the best validation loss occurred very early, at epoch 5. After that point, training loss kept falling (down to 0.0089) while validation loss climbed back up to 0.1296 — nearly 15× the final training loss. With no regularization, every neuron is free to fit the training set as tightly as possible, including its noise, and the model has no mechanism preventing it from drifting away from generalizable patterns once it passes the optimal point.
+### No Dropout — Clear Overfitting
 
-### Dropout = 0.1 — partial regularization:
+Without Dropout, the model fitted the training data very strongly.
 
-The gap shrinks substantially to 0.0663, and the best epoch shifts later, to epoch 8 — dropout slowed the rate at which the model overfits, buying more useful training time. Final validation loss (0.1007) is noticeably lower than the no-dropout run, even though final training loss is higher (0.0344 vs 0.0089). This is the regularization tradeoff in action: a worse fit to training data in exchange for a better fit to unseen data.
+The final training loss dropped to `0.0089`, while validation loss increased to `0.1296`. This produced the largest loss gap: `0.1207`.
 
-### Dropout = 0.3 — best generalization, near-zero gap:
+The best validation loss occurred early at Epoch `5`. After that point, training loss continued decreasing, but validation loss became worse. This is a clear sign of overfitting.
 
-This configuration achieves the smallest loss gap of all three at just 0.0056, meaning training and validation loss converge to nearly the same value (0.0888 vs 0.0944). This is a strong sign of a well-regularized model: the network is no longer significantly outperforming itself on data it has memorized versus data it hasn't seen. The best epoch is also the latest of the three (epoch 12), showing dropout extended useful training time the most by continuously preventing the network from prematurely converging on memorized patterns. Despite having the highest final training loss of the three runs, this configuration achieved the best validation performance overall — both in terms of the lowest best validation loss (0.0853) and the tightest train-validation alignment.
+---
+
+### Dropout = 0.1 — Reduced Overfitting
+
+With `Dropout = 0.1`, the final training loss increased to `0.0337`, but the final validation loss decreased to `0.0949`.
+
+The loss gap became smaller:
+
+```text
+No Dropout Loss Gap: 0.1207
+Dropout 0.1 Loss Gap: 0.0613
+```
+
+This shows that Dropout reduced the model's tendency to memorize the training data.
+
+The best validation loss also improved from `0.0979` to `0.0750`.
+
+---
+
+### Dropout = 0.3 — Strongest Regularization
+
+With `Dropout = 0.3`, the model had the highest final training loss: `0.0886`.
+
+This is expected because Dropout randomly disables neurons during training, making the training task harder.
+
+However, it achieved the best validation results:
+
+```text
+Best Validation Loss: 0.0748
+Validation Accuracy:   0.9796
+```
+
+The validation loss was even lower than the training loss. This can happen because Dropout is active during training but inactive during validation. During validation, the full network is used without randomly disabled neurons.
+
+This configuration provided the strongest regularization among the tested rates.
+
+---
 
 ### Comparison of Overfitting
 
-| Configuration | Observed Overfitting |
-| ------------- | -------------------- |
-| No Dropout    | High                 |
-| Dropout = 0.1 | Reduced              |
-| Dropout = 0.3 | Lowest               |
+| Configuration | Overfitting Level |
+|---|---|
+| No Dropout | High |
+| Dropout = 0.1 | Reduced |
+| Dropout = 0.3 | Lowest |
 
-The model without Dropout fitted the training data extremely closely, but its validation performance became worse. Both Dropout configurations reduced this gap, with `0.3` providing the strongest regularization.
+Dropout reduced overfitting by preventing neurons from depending too heavily on fixed combinations of other neurons.
 
-However, training and validation losses under Dropout are not perfectly comparable because Dropout is active only while calculating the training metrics. Validation uses the complete network without randomly disabled neurons.
+As the Dropout rate increased, the model became less fitted to the training data and more stable on the validation set.
 
-### How Dropout Prevents Neuron Co-adaptation
+---
 
-During training, Dropout randomly zeroes out a fraction of neuron outputs in a layer on each forward pass, forcing the remaining active neurons to produce useful outputs without relying on any specific combination of other neurons being present.
+## 6. How Dropout Prevents Neuron Co-adaptation
 
-This breaks the tendency of neurons to co-adapt, where groups of neurons learn to compensate for each other’s specific errors rather than learning independently useful features.
+During training, Dropout randomly sets a fraction of neuron outputs to zero. This forces the network to learn useful representations without relying on the same fixed group of neurons every time. As a result, neurons become less dependent on each other, and the model becomes less likely to memorize training-specific patterns.
 
-Because the active subnetwork changes randomly during training, the network can be viewed approximately as an ensemble of many overlapping subnetworks that share the same weights. Each subnetwork is encouraged to learn robust and redundant representations.
+This explains why the Dropout models had better validation performance than the model without Dropout.
 
-The progression observed across the three experiments—a shrinking loss gap, a later best epoch, and close training–validation loss alignment with `Dropout = 0.3`—is consistent with the regularization effect becoming stronger as the Dropout rate increases.
+---
 
-## 5. Key Takeaway
+## 7. Key Takeaway
 
-Dropout reduced overfitting by preventing neurons from relying on fixed combinations of other neurons. A Dropout rate of `0.1` achieved the highest final validation accuracy, while `0.3` provided the strongest regularization and the lowest best validation loss.
+Dropout improved generalization by reducing overfitting.
+
+The model without Dropout achieved the lowest training loss, but it had the worst validation loss.
+
+`Dropout = 0.1` reduced overfitting and improved validation performance.
+
+`Dropout = 0.3` provided the strongest regularization and achieved the best validation loss and validation accuracy in this experiment.
