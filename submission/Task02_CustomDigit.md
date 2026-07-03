@@ -1,21 +1,13 @@
-## Task 02 — Custom Image Generalization Test
+# Task 02 — Custom Image Generalization Test
 
-### 1. Objective
+## 1. Objective
 
 Draw a custom handwritten digit, preprocess it to match the model's expected input format, run a prediction, and analyze whether the model generalizes beyond the training distribution — referencing representation learning, distribution shift, and augmentation.
 
 ---
 
-### 2. Code Used
-
+## 2. Code Used
 ```python
-from PIL import Image, ImageOps
-import numpy as np
-import matplotlib.pyplot as plt
-# Create folders if they do not already exist
-os.makedirs("data/custom_digits", exist_ok=True)
-os.makedirs("results/predictions", exist_ok=True)
-
 # Upload the custom handwritten digit
 uploaded = files.upload()
 
@@ -100,34 +92,78 @@ print("Prediction result saved to:", result_path)
 
 ---
 
-### 3. Results
+## 3. Results
+### Digit 4
 
-```
-Digit Drawn: 4
-Predicted Label: 4
-Prediction Confidence: 0.8963
-Prediction Status: Correct
-```
-```
-Digit Drawn: 8
-Predicted Label: 8
-Prediction Confidence: 0.5193
-Prediction Status: Correct
-```
-```
-Digit Drawn: 3
-Predicted Label: 3
-Prediction Confidence: 1.0000
-Prediction Status: Correct
-```
+<table>
+  <tr>
+    <th>Original Image</th>
+    <th>Preprocessed Image</th>
+  </tr>
+  <tr>
+    <td>
+      <img src="../data/custom_digits/task02_original_digit.png" width="300">
+    </td>
+    <td>
+      <img src="../results/predictions/task02_preprocessed_digit.png" width="300">
+    </td>
+  </tr>
+</table>
+
+- **Predicted Label:** `4`
+- **Confidence:** `0.8963`
+- **Status:** `Correct`
+
+### Digit 8
+
+<table>
+  <tr>
+    <th>Original Image</th>
+    <th>Preprocessed Image</th>
+  </tr>
+  <tr>
+    <td>
+      <img src="../data/custom_digits/task02_original_digit_2.png" width="300">
+    </td>
+    <td>
+      <img src="../results/predictions/task02_preprocessed_digit_2.png" width="300">
+    </td>
+  </tr>
+</table>
+
+- **Predicted Label:** `8`
+- **Confidence:** `0.5193`
+- **Status:** `Correct`
+
+### Digit 3
+
+<table>
+  <tr>
+    <th>Original Image</th>
+    <th>Preprocessed Image</th>
+  </tr>
+  <tr>
+    <td>
+      <img src="../data/custom_digits/task02_original_digit_3.png" width="300">
+    </td>
+    <td>
+      <img src="../results/predictions/task02_preprocessed_digit_3.png" width="300">
+    </td>
+  </tr>
+</table>
+
+- **Predicted Label:** `3`
+- **Confidence:** `1.0000`
+- **Status:** `Correct`
+
+
 The custom image was converted to grayscale, resized to 28 × 28, normalized to the range [0, 1], and reshaped to (1, 28, 28) before being passed to the model.
 
 The final preprocessed image used a white digit on a black background to make it more similar to the MNIST images used during training.
 
 ---
 
-### 4. Short Analysis
-
+## 4. Short Analysis
 All three custom digits were classified correctly, suggesting that the model can generalize beyond the MNIST test set to new hand-drawn inputs. However, the differences in confidence show that some custom digits matched the learned MNIST representations more closely than others.
 
 #### Digit 4 — Confidence: 89.63%
@@ -148,17 +184,19 @@ The digit `3` was correctly classified with very high confidence. It was clear, 
 
 The displayed confidence of `100.00%` indicates that the model assigned nearly all the probability to class `3`. However, this value may have been rounded when printed and should not be interpreted as a guarantee that every similar image would be classified correctly.
 
-### Did the Model Classify the Digits Correctly?
+---
+
+## 5. Did the Model Classify the Digits Correctly?
 
 Yes. The model correctly classified all three custom digits: `4`, `8`, and `3`. The predictions for `4` and `3` had high confidence, while the lower confidence for `8` showed that the model found its features more ambiguous.
 
-### Relationship to Representation Learning
+## 6. Relationship to Representation Learning
 
 These results suggest that the neural network learned internal representations of digit shapes instead of merely memorizing individual training images. The hidden layer transformed raw pixel values into useful patterns related to lines, curves, intersections, and loop structures.
 
 When a custom image contained features similar to those learned from MNIST, the model assigned the correct class the highest probability. The lower confidence for digit `8` demonstrates that these representations are affected by differences in handwriting style, stroke thickness, position, and shape.
 
-### Effect of the Lack of Data Augmentation
+## 7. Effect of the Lack of Data Augmentation
 
 The model was trained without data augmentation, so it had limited exposure to variations such as thicker strokes, uneven shapes, rotations, shifts, and different digit sizes.
 
@@ -166,6 +204,6 @@ This may explain the lower confidence for digit `8`. Training with augmented ima
 
 ---
 
-### 5. Key Takeaway
+## 8. Key Takeaway
 
 The model generalized successfully to the three custom digits, but the confidence differences show that prediction quality depends on how closely each new image matches the visual patterns and representations learned from the training data.
