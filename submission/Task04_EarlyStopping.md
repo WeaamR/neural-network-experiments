@@ -7,13 +7,6 @@ The objective of this task is to examine how the `EarlyStopping` callback contro
 ## 2. Code Used
 
 ```python
-# Create a directory for Task 04 results.
-task4_results_dir = Path(
-    "results/loss_curves/task04_early_stopping"
-)
-task4_results_dir.mkdir(parents=True, exist_ok=True)
-
-
 def create_model(optimizer_name, seed=42):
     """
     Create the same model architecture for each experiment.
