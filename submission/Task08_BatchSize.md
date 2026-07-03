@@ -343,16 +343,28 @@ This explains why Batch Size `128` trained much faster than Batch Size `8`.
 ---
 
 ### Generalization and Overfitting
+Batch size affects how much gradient noise appears during training.
 
-The smallest batch did not generalize best in this experiment.
+A small batch uses fewer samples to estimate the gradient, so the update direction is noisier. This noise can sometimes help the optimizer explore different regions of the loss landscape instead of following one very precise path. In this sense, small-batch noise may act as a form of implicit regularization.
 
-Batch Size `8` overfit early and had the highest final validation loss.
+A large batch produces a more stable gradient estimate. This can make training smoother and faster, but it may reduce exploration. In some cases, this can lead the model toward sharper minima that fit the training data well but generalize less effectively to unseen data.
 
-Batch Size `128` achieved the best validation loss and the smoothest validation curve, but Batch Size `32` achieved the highest final validation accuracy.
+However, this behavior is not guaranteed.
 
-Therefore, the results show a tradeoff rather than one universally best batch size.
+In this experiment, the results did **not** clearly show that larger batches generalize worse. Batch Size `128` achieved the lowest best validation loss and the lowest final validation loss, while Batch Size `32` achieved the highest final validation accuracy.
 
----
+```text
+Batch Size 128 → Best Val Loss = 0.0905, Final Val Loss = 0.1263
+Batch Size 32  → Final Val Accuracy = 97.48%
+```
+
+Therefore, the generalization result depends on the evaluation metric:
+
+- If we focus on Validation Loss, Batch Size 128 performed best.
+- If we focus on Validation Accuracy, Batch Size 32 performed best.
+- Batch Size 8 showed early overfitting and the most unstable validation-loss behavior.
+
+So, larger batches may sometimes generalize worse in theory, but this experiment showed a more nuanced tradeoff rather than a simple rule.
 
 ## 7. Key Takeaway
 
