@@ -1,56 +1,62 @@
-## Task 03 — Epoch-Based Learning Curve Exploration
+# Task 03 — Epoch-Based Learning Curve Exploration
 
-### 1. Objective
+## 1. Objective
 
 Train the same model three times using 5, 10, and 20 epochs, plot the learning curves for each run, and analyze the training dynamics — identifying overfitting signs and explaining how Adam influenced convergence speed and stability.
 
 ---
 
-### 2. Code Used
+## 2. Code Used
 
 ```python
-# Create a new neural network model for each experiment.
-# Each model starts with newly initialized weights.
-def create_model(optimizer="adam"):
+def create_model(seed=42):
+    """
+    Create a new model with the same initial weights
+    for every epoch experiment.
+    """
+
+    # Reset the random generators before creating each model.
+    keras.utils.set_random_seed(seed)
 
     model = keras.Sequential([
-        # Define the expected input shape of an MNIST image.
         keras.layers.Input(shape=(28, 28)),
-
-        # Convert the 28×28 image into a vector of 784 pixel values.
         keras.layers.Flatten(),
-
-        # Hidden layer that learns useful non-linear patterns.
         keras.layers.Dense(64, activation="relu"),
-
-        # Output layer with one probability for each digit from 0 to 9.
         keras.layers.Dense(10, activation="softmax")
     ])
 
-    # Configure the model for training.
     model.compile(
-        optimizer=optimizer,
+        optimizer=keras.optimizers.Adam(
+            learning_rate=0.001
+        ),
         loss="sparse_categorical_crossentropy",
         metrics=["accuracy"]
     )
 
     return model
 
-# Create a directory for Task 3 results.
-task3_results_dir = Path("results/loss_curves/task03_epochs")
-task3_results_dir.mkdir(parents=True, exist_ok=True)
 
 def plot_learning_curves(history, num_epochs):
+    """
+    Plot and save the loss and accuracy curves.
+    """
 
-    # Plot training loss and validation loss.
-    plt.figure(figsize=(7, 5))
+    epoch_numbers = range(
+        1,
+        len(history.history["loss"]) + 1
+    )
+
+    # Plot loss curves.
+    fig = plt.figure(figsize=(7, 5))
 
     plt.plot(
+        epoch_numbers,
         history.history["loss"],
         label="Training Loss"
     )
 
     plt.plot(
+        epoch_numbers,
         history.history["val_loss"],
         label="Validation Loss"
     )
@@ -58,27 +64,31 @@ def plot_learning_curves(history, num_epochs):
     plt.title(f"Loss Curves — {num_epochs} Epochs")
     plt.xlabel("Epoch")
     plt.ylabel("Loss")
+    plt.xticks(epoch_numbers)
     plt.legend()
     plt.grid()
 
-    # Save the loss curve before displaying it
-    plt.savefig(
-        task3_results_dir / f"task03_{num_epochs}_epochs_loss.png",
+    fig.savefig(
+        task3_results_dir
+        / f"task03_{num_epochs}_epochs_loss.png",
         dpi=300,
         bbox_inches="tight"
     )
 
     plt.show()
+    plt.close(fig)
 
-    # Plot training accuracy and validation accuracy.
-    plt.figure(figsize=(7, 5))
+    # Plot accuracy curves.
+    fig = plt.figure(figsize=(7, 5))
 
     plt.plot(
+        epoch_numbers,
         history.history["accuracy"],
         label="Training Accuracy"
     )
 
     plt.plot(
+        epoch_numbers,
         history.history["val_accuracy"],
         label="Validation Accuracy"
     )
@@ -86,118 +96,192 @@ def plot_learning_curves(history, num_epochs):
     plt.title(f"Accuracy Curves — {num_epochs} Epochs")
     plt.xlabel("Epoch")
     plt.ylabel("Accuracy")
+    plt.xticks(epoch_numbers)
     plt.legend()
     plt.grid()
 
-    # Save the accuracy curve before displaying it.
-    plt.savefig(
-        task3_results_dir / f"task03_{num_epochs}_epochs_accuracy.png",
+    fig.savefig(
+        task3_results_dir
+        / f"task03_{num_epochs}_epochs_accuracy.png",
         dpi=300,
         bbox_inches="tight"
     )
 
     plt.show()
+    plt.close(fig)
 
-# Experiment 1: Train a new model for 5 epochs.
-model_5 = create_model()
 
-history_5 = model_5.fit(
-    x_train,
-    y_train,
-    epochs=5,
-    validation_data=(x_val, y_val)
+# Store the training histories.
+histories = {}
 
-# Experiment 2: Train a new model for 10 epochs.
-model_10 = create_model()
+# Train the same architecture for 5, 10, and 20 epochs.
+for num_epochs in [5, 10, 20]:
 
-history_10 = model_10.fit(
-    x_train,
-    y_train,
-    epochs=10,
-    validation_data=(x_val, y_val)
-)
+    model = create_model(seed=42)
 
-# Experiment 3: Train a new model for 20 epochs.
-model_20 = create_model()
+    history = model.fit(
+        x_train,
+        y_train,
+        epochs=num_epochs,
+        batch_size=32,
+        validation_data=(x_val, y_val),
+        verbose=1
+    )
 
-history_20 = model_20.fit(
-    x_train,
-    y_train,
-    epochs=20,
-    validation_data=(x_val, y_val)
-)
+    histories[num_epochs] = history
 
-# Store the training histories in a dictionary.
-histories = {
-    5: history_5,
-    10: history_10,
-    20: history_20
-}
+    plot_learning_curves(
+        history,
+        num_epochs
+    )
 
-# Create the directory for Task 3 results if it does not exist.
-task3_results_dir = Path("results/loss_curves/task03_epochs")
-task3_results_dir.mkdir(parents=True, exist_ok=True)
+```
 
-# Define the path of the text file.
-results_file = task3_results_dir / "task03_final_metrics.txt"
+## 3. Results
 
-# Save the final metrics of each experiment.
-with open(results_file, "w", encoding="utf-8") as file:
+| Epochs | Train Loss | Val Loss | Train Accuracy | Val Accuracy | Best Epoch |
+|---:|---:|---:|---:|---:|---:|
+| 5  | 0.0699 | 0.0991 | 0.9792 | 0.9704 | 4 |
+| 10 | 0.0296 | 0.1080 | 0.9922 | 0.9716 | 4 |
+| 20 | 0.0081 | 0.1307 | 0.9980 | 0.9746 | 4 |
 
-    file.write("Task 03 — Epoch-Based Learning Curve Exploration\n")
-    file.write("=" * 55 + "\n")
+The training loss decreased continuously as the number of epochs increased. However, the validation loss reached its minimum value of `0.0986` at Epoch 4 in all three experiments.
 
-    for epochs, history in histories.items():
+The loss gap increased from `0.0292` after 5 epochs to `0.0784` after 10 epochs and `0.1226` after 20 epochs.
 
-        # Get the metrics recorded at the final epoch.
-        final_training_loss = history.history["loss"][-1]
-        final_validation_loss = history.history["val_loss"][-1]
-        final_training_accuracy = history.history["accuracy"][-1]
-        final_validation_accuracy = history.history["val_accuracy"][-1]
+**How the Best Epoch Was Determined?**
 
-        file.write(f"\nResults for {epochs} Epochs\n")
-        file.write("-" * 30 + "\n")
-        file.write(f"Final Training Loss: {final_training_loss:.4f}\n")
-        file.write(f"Final Validation Loss: {final_validation_loss:.4f}\n")
-        file.write(f"Final Training Accuracy: {final_training_accuracy:.4f}\n")
-        file.write(f"Final Validation Accuracy: {final_validation_accuracy:.4f}\n")
+The best epoch was selected based on the lowest validation loss:
 
+```python
+best_epoch = np.argmin(history.history["val_loss"]) + 1
+best_validation_loss = np.min(history.history["val_loss"])
 ```
 
 ---
 
-### 3. Results
+## 4. Learning Curves
 
-| Epochs | Train Loss | Val Loss | Train Acc | Val Acc |
-|--------|-----------|----------|-----------|---------|
-| 5      | 0.0713    | 0.0958   | 0.9783    | 0.9732  |
-| 10     | 0.0290    | 0.0887   | 0.9911    | 0.9772  |
-| 20     | 0.0091    | 0.1131   | 0.9973    | 0.9782  |
+### 5 Epochs
 
-> **Plots saved to** `results/` — loss and accuracy curves for each of the three runs.
+<table>
+  <tr>
+    <th>Loss Curves</th>
+    <th>Accuracy Curves</th>
+  </tr>
+  <tr>
+    <td>
+      <img src="../results/loss_curves/task03_epochs/task03_5_epochs_loss.png" width="450">
+    </td>
+    <td>
+      <img src="../results/loss_curves/task03_epochs/task03_5_epochs_accuracy.png" width="450">
+    </td>
+  </tr>
+</table>
+
+### 10 Epochs
+
+<table>
+  <tr>
+    <th>Loss Curves</th>
+    <th>Accuracy Curves</th>
+  </tr>
+  <tr>
+    <td>
+      <img src="../results/loss_curves/task03_epochs/task03_10_epochs_loss.png" width="450">
+    </td>
+    <td>
+      <img src="../results/loss_curves/task03_epochs/task03_10_epochs_accuracy.png" width="450">
+    </td>
+  </tr>
+</table>
+
+### 20 Epochs
+
+<table>
+  <tr>
+    <th>Loss Curves</th>
+    <th>Accuracy Curves</th>
+  </tr>
+  <tr>
+    <td>
+      <img src="../results/loss_curves/task03_epochs/task03_20_epochs_loss.png" width="450">
+    </td>
+    <td>
+      <img src="../results/loss_curves/task03_epochs/task03_20_epochs_accuracy.png" width="450">
+    </td>
+  </tr>
+</table>
 
 ---
 
-### 4. Short Analysis
+## 5. Training Dynamics Analysis
 
-**5 Epochs — Underfitting zone:**
+### 5 Epochs
 
-Both curves are still descending at epoch 5 with no gap between them, which means the model has not yet converged. Training accuracy of 0.9783 vs. validation accuracy of 0.9732 shows the two are still close — a sign that the model is still learning generalizable features and has not started memorizing. This is the healthy early-training phase, but stopping here leaves performance on the table.
+During the first four epochs, both training and validation loss decreased, showing that the model was learning useful patterns.
 
-**10 Epochs — Sweet spot:**
+At Epoch 5, training loss continued to decrease, while validation loss increased slightly from its best value. This represents the beginning of overfitting, although the gap was still relatively small.
 
-At 10 epochs, the training loss (0.0290) is notably lower than validation loss (0.0887), and a small gap begins to appear between the two curves. However, validation accuracy (0.9772) is still improving and the gap is not widening aggressively. This is the most balanced run — the model has learned robust representations without significantly overfitting.
+The model was not underfitting because it already achieved:
 
-**20 Epochs — Early overfitting signal:**
+- Training accuracy: `97.92%`
+- Validation accuracy: `97.04%`
 
-This is where the divergence becomes clear. Training loss dropped to 0.0091 while validation loss actually increased to 0.1131 — higher than at 10 epochs. Looking at the loss curve, the validation loss plateaus and starts drifting upward after approximately epoch 5–7, while training loss continues to fall. Training accuracy reached 0.9973 but validation accuracy only gained marginally (0.9782), a difference of nearly 2% — a classic overfitting signature. The model is memorizing training-specific patterns rather than learning generalizable features.
+### 10 Epochs
 
-**Adam optimizer's role:**
+Training loss continued to decrease until it reached `0.0296`, while validation loss increased to `0.1080`.
 
-Across all three runs, Adam drove fast and stable convergence in the early epochs — the sharp drop in training loss between epoch 0 and epoch 3 is visible in all three plots. This is Adam's adaptive learning rate at work: it automatically scales updates per-weight based on gradient history, allowing the model to make large steps early when gradients are strong and smaller, more precise steps as it approaches a minimum. This is why even the 5-epoch run already achieves 97%+ accuracy — Adam compresses the useful learning into very few epochs. However, Adam's efficiency also means the model reaches the overfitting threshold faster, which is why the validation loss starts rising noticeably by epoch 7–8 in the 20-epoch run without any regularization in place.
+Training accuracy increased to `99.22%`, but validation accuracy remained around `97.16%`. The widening difference between training and validation performance shows that the model increasingly fitted training-specific patterns.
+
+Therefore, overfitting became clearer after Epoch 4.
+
+### 20 Epochs
+
+The 20-epoch experiment showed the strongest overfitting.
+
+Training loss decreased to `0.0081`, and training accuracy reached `99.80%`. In contrast, validation loss increased to `0.1307`.
+
+Although validation accuracy increased slightly to `97.46%`, the validation loss became considerably worse. This can occur when the model makes a small number of incorrect predictions with very high confidence, which heavily increases the Cross-Entropy loss.
+
+The model continued improving on the training data without achieving a similar improvement on unseen validation data.
 
 ---
 
-### 5. Key Takeaway
+## 5. Overfitting Signs
 
-More epochs do not always mean better performance — beyond a certain point, training loss keeps falling while validation loss rises, revealing overfitting; the 10-epoch run represents the optimal balance between convergence and generalization for this model and dataset.
+The main signs of overfitting were:
+
+- Training loss continued decreasing.
+- Validation loss stopped improving after Epoch 4.
+- The gap between training and validation loss increased.
+- Training accuracy approached `100%`.
+- Validation accuracy improved only slightly.
+
+The best generalization point was around Epoch 4, where the validation loss was lowest.
+
+---
+
+## 6. Adam Optimizer Influence
+
+Adam produced rapid convergence during the first few epochs.
+
+The training loss dropped sharply, while training accuracy increased from approximately `91%` after the first epoch to more than `97%` within only a few epochs.
+
+Adam adjusts the update size separately for each model parameter using the recent gradient history. This helped produce:
+
+- Fast improvement during early training.
+- A smooth decrease in training loss.
+- Stable training without large oscillations.
+
+However, Adam did not prevent overfitting. Once validation performance stopped improving, it continued optimizing the model for the training data.
+
+---
+
+## 7. Key Takeaway
+
+Increasing the number of epochs improved training performance but did not continuously improve validation performance.
+
+The lowest validation loss occurred at Epoch 4. Training beyond this point caused the model to fit the training data more strongly while validation loss increased.
+
+Therefore, more epochs do not necessarily produce better generalization, and techniques such as Early Stopping can be used to stop training near the best validation epoch.
