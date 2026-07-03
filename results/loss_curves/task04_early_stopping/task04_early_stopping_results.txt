@@ -1,0 +1,44 @@
+Task 04 — EarlyStopping Behavior Analysis
+==================================================
+
+Experiment: Adam — Patience 3
+-----------------------------------
+Optimizer: adam
+Patience: 3
+Maximum Epochs: 30
+Best Epoch: 4
+Stopped Epoch: 7
+Best Validation Loss: 0.0986
+Final Training Loss: 0.0485
+Final Validation Loss: 0.1025
+Final Training Accuracy: 0.9860
+Final Validation Accuracy: 0.9698
+EarlyStopping Triggered: True
+
+Experiment: Adam — Patience 5
+-----------------------------------
+Optimizer: adam
+Patience: 5
+Maximum Epochs: 30
+Best Epoch: 4
+Stopped Epoch: 9
+Best Validation Loss: 0.0986
+Final Training Loss: 0.0350
+Final Validation Loss: 0.1065
+Final Training Accuracy: 0.9901
+Final Validation Accuracy: 0.9698
+EarlyStopping Triggered: True
+
+Experiment: SGD — Patience 3
+-----------------------------------
+Optimizer: sgd
+Patience: 3
+Maximum Epochs: 50
+Best Epoch: 50
+Stopped Epoch: 50
+Best Validation Loss: 0.0836
+Final Training Loss: 0.0629
+Final Validation Loss: 0.0836
+Final Training Accuracy: 0.9831
+Final Validation Accuracy: 0.9748
+EarlyStopping Triggered: False
