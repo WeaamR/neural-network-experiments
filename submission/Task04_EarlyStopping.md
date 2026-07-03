@@ -119,52 +119,22 @@ The objective of this task is to examine how the `EarlyStopping` callback contro
 
 ## 3. Results
 
-| Experiment | Optimizer | Patience | Best Epoch | Stopped Epoch | Best Validation Loss |
-| ---------- | --------- | -------: | ---------: | ------------: | -------------------: |
-| 1          | Adam      |        3 |  `7` |     `10` |            `0.0822` |
-| 2          | Adam      |        5 |  `8` |     `13` |            `0.0775` |
-| 3          | SGD       |        3 |  `49` |     `50` |            `0.0859` |
+| Experiment | Optimizer | Patience | Maximum Epochs | Best Epoch | Training Ended At | Best Validation Loss | EarlyStopping Triggered |
+|---|---|---:|---:|---:|---:|---:|---|
+| 1 | Adam | 3 | 30 | 4 | 7 | 0.0986 | Yes |
+| 2 | Adam | 5 | 30 | 4 | 9 | 0.0986 | Yes |
+| 3 | SGD | 3 | 50 | 50 | 50 | 0.0836 | No |
 
-## 4. Short Analysis
+`Training Ended At` represents the number of epochs completed.
 
-### Adam with Patience = 3
+For the SGD experiment, training ended because it reached the maximum limit of `50 epochs`, not because `EarlyStopping` was triggered.
 
-The model achieved its lowest validation loss of `0.0822` at epoch `7`. Training then continued for three consecutive epochs without further improvement and stopped at epoch `10`.
+---
 
-This matches the behavior of `patience=3`: EarlyStopping waits for three epochs after the best result before stopping. Because `restore_best_weights=True` was enabled, the model restored the weights learned at epoch `7`, rather than keeping the weights from epoch `10`.
+## 4. How the Best Epoch Was Determined
 
-### Why Validation Loss Controls the Decision
+The best epoch was selected based on the minimum validation loss:
 
-Validation loss measures the model’s performance on data that is not used to update its weights. Training loss may continue decreasing even when the model starts fitting the training data too closely.
-
-Therefore, monitoring `val_loss` helps detect when additional training is no longer improving generalization. When validation loss stops decreasing, the model may be approaching or beginning to overfit.
-
-### Adam with Patience = 5
-
-With `patience=5`, the lowest validation loss was `0.0775` at epoch `8`, and training stopped at epoch `13`.
-
-The larger patience value allowed the model to continue for five epochs without improvement. Compared with `patience=3`, this gave the model more time to recover from temporary fluctuations in validation loss.
-
-In this experiment, the longer patience produced a slightly lower best validation loss. However, increasing patience does not always guarantee better performance; it may also increase training time and allow overfitting to continue for longer.
-
-### Effect of Using SGD
-
-With SGD, the best validation loss was `0.0859` at epoch `49`. Training ended at epoch `50`, but this was not caused by EarlyStopping.
-
-Since only one epoch occurred after the best epoch, the required three consecutive epochs without improvement were not reached. The experiment ended because it reached the maximum limit of `50 epochs`.
-
-This shows that **SGD converged more slowly than Adam** in this experiment. Adam reached its best validation performance within the first eight epochs, while SGD continued improving gradually until epoch `49`.
-
-A different optimizer changes the EarlyStopping pattern indirectly because it affects the speed and stability of the weight updates. EarlyStopping still monitors the same `val_loss`, but different optimizers produce different validation-loss curves.
-
-### EarlyStopping as Indirect Regularization
-
-EarlyStopping acts as an indirect form of regularization by limiting the number of weight updates performed during training.
-
-When training continues for too long, the model may begin learning noise or details that are specific to the training set. Stopping near the best validation epoch helps prevent this excessive fitting and preserves better generalization.
-
-Unlike L2 regularization, EarlyStopping does not add a penalty to the loss function. Unlike Dropout, it does not change the network architecture. Instead, it controls how long the model is allowed to train.
-
-## 5. Key Takeaway
-
-Adam converged much faster than SGD, while increasing patience from `3` to `5` allowed more time for validation performance to improve. EarlyStopping helps reduce overfitting by stopping training when validation loss no longer improves and restoring the best learned weights.
+```python
+best_epoch = np.argmin(history.history["val_loss"]) + 1
+best_validation_loss = np.min(history.history["val_loss"])
