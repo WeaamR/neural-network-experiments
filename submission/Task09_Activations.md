@@ -144,32 +144,6 @@ for activation_name, activation_function in activation_functions.items():
         "final_loss_gap":       history.history["val_loss"][-1] - history.history["loss"][-1],
         "gradient_norm":        gradient_norm
     }
-
-
-# Print and save all results.
-results_file = task9_results_dir / "task09_activation_results.txt"
-
-with open(results_file, "w", encoding="utf-8") as f:
-    f.write("Task 09 — Activation Function Comparison\n")
-    f.write("=" * 50 + "\n")
-
-    for activation_name, r in activation_results.items():
-        line = (
-            f"\nActivation = {activation_name}\n"
-            f"Final Training Loss:       {r['final_train_loss']:.4f}\n"
-            f"Final Validation Loss:     {r['final_val_loss']:.4f}\n"
-            f"Final Training Accuracy:   {r['final_train_accuracy']:.4f}\n"
-            f"Final Validation Accuracy: {r['final_val_accuracy']:.4f}\n"
-            f"Best Validation Loss:      {r['best_val_loss']:.4f}\n"
-            f"Best Validation Loss Epoch:{r['best_val_loss_epoch']}\n"
-            f"Final Loss Gap:            {r['final_loss_gap']:.4f}\n"
-            f"Hidden Gradient Norm:      {r['gradient_norm']:.6f}\n"
-        )
-
-        print(line)
-        f.write(line)
-
-print(f"Results saved to: {results_file}")
 ```
 
 ---
