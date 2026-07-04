@@ -110,8 +110,8 @@ print("Prediction result saved to:", result_path)
   </tr>
 </table>
 
-- **Predicted Label:** `4`
-- **Confidence:** `0.8963`
+- **Predicted Label:** `8`
+- **Confidence:** `0.5193`
 - **Status:** `Correct`
 
 ### Digit 8
@@ -131,8 +131,8 @@ print("Prediction result saved to:", result_path)
   </tr>
 </table>
 
-- **Predicted Label:** `8`
-- **Confidence:** `0.5193`
+- **Predicted Label:** `4`
+- **Confidence:** `0.8963`
 - **Status:** `Correct`
 
 ### Digit 3
